@@ -36,6 +36,9 @@ interface EditorState {
   // User tier
   userTier: 'free' | 'pro';
   
+  // Flag to indicate programmatic content change (not user typing)
+  shouldSyncToEditor: boolean;
+  
   // Actions
   setContent: (content: string) => void;
   setTranslatedContent: (content: string) => void;
@@ -52,6 +55,7 @@ interface EditorState {
   applySuggestion: (errorId: string, suggestion: string) => void;
   ignoreError: (errorId: string) => void;
   applyAllSuggestions: () => void;
+  setShouldSyncToEditor: (should: boolean) => void;
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -69,6 +73,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   characterCount: 0,
   dailyWordUsage: 0,
   userTier: 'free',
+  shouldSyncToEditor: false,
 
   // Actions
   setContent: (content) => set({ content }),
@@ -102,6 +107,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     characterCount: chars 
   }),
   
+  setShouldSyncToEditor: (should) => set({ shouldSyncToEditor: should }),
+  
   applySuggestion: (errorId, suggestion) => {
     const state = get();
     const error = state.errors.find(e => e.id === errorId);
@@ -129,11 +136,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     
     console.log('New content:', newContent);
     
-    // Update content and set a flag for editor to pick up
+    // Update content and flag editor to sync (programmatic change, not user typing)
     set({
       content: newContent,
       translatedContent: newContent,
-      errors: state.errors.filter(e => e.id !== errorId)
+      errors: state.errors.filter(e => e.id !== errorId),
+      shouldSyncToEditor: true  // Signal editor to update
     });
   },
   
@@ -164,11 +172,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     
     console.log('Apply All: New content:', newContent);
     
-    // Update content
+    // Update content and flag editor to sync
     set({
       content: newContent,
       translatedContent: newContent,
-      errors: []
+      errors: [],
+      shouldSyncToEditor: true  // Signal editor to update
     });
   },
 }));

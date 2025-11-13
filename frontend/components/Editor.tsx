@@ -31,6 +31,8 @@ export default function Editor() {
     setActiveErrorId,
     isFrozen,
     setIsFrozen,
+    shouldSyncToEditor,
+    setShouldSyncToEditor,
   } = useEditorStore();
 
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
@@ -170,38 +172,28 @@ export default function Editor() {
     [editor, errors.length]
   );
 
-  // Watch for external content updates (from Accept/Accept All)
-  const [lastAppliedContent, setLastAppliedContent] = useState('');
-  
+  // ONLY sync editor when suggestions are applied (not during user typing)
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || !shouldSyncToEditor) return;
     
-    // Get the current editor text
-    const editorText = editor.getText();
+    console.log('🔄 Syncing editor with applied suggestion');
+    console.log('New content:', content);
     
-    // Check if content from store is different from editor AND from last applied
-    if (content && content !== editorText && content !== lastAppliedContent) {
-      console.log('🔄 Syncing editor with store content');
-      console.log('Editor has:', editorText);
-      console.log('Store has:', content);
-      
-      // Set flag to skip auto-check
-      setSkipNextAutoCheck(true);
-      
-      // Update editor with the new content
-      editor.commands.setContent(content, false);
-      editor.commands.focus('end');
-      
-      // Remember this content to avoid loops
-      setLastAppliedContent(content);
-      
-      // Reset flag after delay
-      setTimeout(() => {
-        setSkipNextAutoCheck(false);
-        setLastAppliedContent('');
-      }, 3000);
-    }
-  }, [content, editor]);
+    // Set flag to skip auto-check
+    setSkipNextAutoCheck(true);
+    
+    // Update editor with the corrected content
+    editor.commands.setContent(content, false);
+    editor.commands.focus('end');
+    
+    // Reset the sync flag immediately
+    setShouldSyncToEditor(false);
+    
+    // Reset skip flag after delay
+    setTimeout(() => {
+      setSkipNextAutoCheck(false);
+    }, 3000);
+  }, [shouldSyncToEditor, editor, content, setShouldSyncToEditor]);
 
   useEffect(() => {
     // Skip auto-check if suggestions were just applied
