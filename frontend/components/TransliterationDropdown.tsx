@@ -51,7 +51,7 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setSelectedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
-      } else if (e.key === 'Enter' || e.key === ' ') {
+      } else if (e.key === ' ') {
         e.preventDefault();
         if (suggestions[selectedIndex]) {
           onSelect(suggestions[selectedIndex].text);
@@ -106,8 +106,7 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
       ))}
       <div className="px-3 py-2 bg-gray-50 border-t border-gray-200">
         <p className="text-xs text-gray-600">
-          <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-xs">Space</kbd> or{' '}
-          <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-xs">Enter</kbd> to select
+          <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-xs">Space</kbd> to select
         </p>
       </div>
     </div>
