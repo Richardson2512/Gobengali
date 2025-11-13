@@ -13,10 +13,10 @@ interface ExportModalProps {
 }
 
 export function ExportModal({ onClose }: ExportModalProps) {
-  const { translatedContent } = useEditorStore();
+  const { content } = useEditorStore();
 
   const exportAsText = () => {
-    const blob = new Blob([translatedContent], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     saveAs(blob, `gobengali-${Date.now()}.txt`);
     onClose();
   };
@@ -27,7 +27,7 @@ export function ExportModal({ onClose }: ExportModalProps) {
         sections: [
           {
             properties: {},
-            children: translatedContent.split('\n').map(
+            children: content.split('\n').map(
               (line) =>
                 new Paragraph({
                   children: [
@@ -57,7 +57,7 @@ export function ExportModal({ onClose }: ExportModalProps) {
       
       // Note: jsPDF has limited Bengali font support
       // For production, you'd need to embed a Bengali font
-      const lines = doc.splitTextToSize(translatedContent, 180);
+      const lines = doc.splitTextToSize(content, 180);
       doc.text(lines, 15, 15);
       
       doc.save(`gobengali-${Date.now()}.pdf`);
