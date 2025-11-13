@@ -2,7 +2,7 @@
 
 import { useEditorStore } from "@/store/editorStore";
 import { Button } from "./ui/Button";
-import { X, FileText, FileDown, FilePdf } from "lucide-react";
+import { X, FileText, FileDown, FileType } from "lucide-react";
 import { saveAs } from "file-saver";
 import { Document, Paragraph, Packer, TextRun } from "docx";
 import jsPDF from "jspdf";
@@ -121,7 +121,7 @@ export function ExportModal({ onClose }: ExportModalProps) {
             className="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-primary/5 transition-all group"
           >
             <div className="flex items-center space-x-3">
-              <FilePdf size={24} className="text-gray-600 group-hover:text-primary" />
+              <FileType size={24} className="text-gray-600 group-hover:text-primary" />
               <div className="text-left">
                 <p className="font-medium text-gray-900">PDF Document (.pdf)</p>
                 <p className="text-xs text-gray-500">Portable document format</p>

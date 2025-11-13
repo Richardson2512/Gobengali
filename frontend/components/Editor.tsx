@@ -47,6 +47,7 @@ export default function Editor() {
   const [skipNextAutoCheck, setSkipNextAutoCheck] = useState(false);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Underline,
