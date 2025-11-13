@@ -14,6 +14,9 @@ interface ExportModalProps {
 
 export function ExportModal({ onClose }: ExportModalProps) {
   const { content } = useEditorStore();
+  
+  // Detect if content has Bengali
+  const hasBengali = /[\u0980-\u09FF]/.test(content);
 
   const exportAsText = () => {
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -52,19 +55,49 @@ export function ExportModal({ onClose }: ExportModalProps) {
   };
 
   const exportAsPdf = () => {
+    // Check if content has Bengali characters
+    const hasBengali = /[\u0980-\u09FF]/.test(content);
+    
+    if (hasBengali) {
+      const proceed = confirm(
+        "⚠️ PDF Export Limitation\n\n" +
+        "PDF format doesn't support Bengali fonts properly and will show garbled text.\n\n" +
+        "We recommend:\n" +
+        "• Text format (.txt) - Perfect for Bengali ✅\n" +
+        "• Word format (.docx) - Perfect for Bengali ✅\n\n" +
+        "Do you still want to export as PDF?"
+      );
+      
+      if (!proceed) return;
+    }
+    
     try {
       const doc = new jsPDF();
       
-      // Note: jsPDF has limited Bengali font support
-      // For production, you'd need to embed a Bengali font
-      const lines = doc.splitTextToSize(content, 180);
-      doc.text(lines, 15, 15);
+      // Warning: Bengali text will not display correctly in PDF
+      // jsPDF doesn't support Unicode Bengali fonts without embedding custom fonts
+      if (hasBengali) {
+        // Add warning text in PDF
+        doc.setFontSize(10);
+        doc.setTextColor(255, 0, 0);
+        doc.text("Warning: Bengali characters may not display correctly in PDF.", 15, 10);
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(12);
+        
+        // Try to include content anyway
+        const lines = doc.splitTextToSize(content, 180);
+        doc.text(lines, 15, 20);
+      } else {
+        // English text works fine
+        const lines = doc.splitTextToSize(content, 180);
+        doc.text(lines, 15, 15);
+      }
       
       doc.save(`gobengali-${Date.now()}.pdf`);
       onClose();
     } catch (error) {
       console.error("PDF export failed:", error);
-      alert("Failed to export as PDF. Please try TXT or DOCX format.");
+      alert("Failed to export as PDF. Please try TXT or DOCX format instead.");
     }
   };
 
@@ -95,8 +128,17 @@ export function ExportModal({ onClose }: ExportModalProps) {
             <div className="flex items-center space-x-3">
               <FileText size={24} className="text-gray-600 group-hover:text-primary" />
               <div className="text-left">
-                <p className="font-medium text-gray-900">Plain Text (.txt)</p>
-                <p className="text-xs text-gray-500">Simple text format</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-gray-900">Plain Text (.txt)</p>
+                  {hasBengali && (
+                    <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-semibold">
+                      ✓ Best for Bengali
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500">
+                  {hasBengali ? 'Perfect Unicode support for Bengali' : 'Simple text format'}
+                </p>
               </div>
             </div>
             <FileDown size={20} className="text-gray-400 group-hover:text-primary" />
@@ -109,8 +151,17 @@ export function ExportModal({ onClose }: ExportModalProps) {
             <div className="flex items-center space-x-3">
               <FileDown size={24} className="text-gray-600 group-hover:text-primary" />
               <div className="text-left">
-                <p className="font-medium text-gray-900">Word Document (.docx)</p>
-                <p className="text-xs text-gray-500">Microsoft Word format</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-gray-900">Word Document (.docx)</p>
+                  {hasBengali && (
+                    <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-semibold">
+                      ✓ Best for Bengali
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500">
+                  {hasBengali ? 'Full Bengali font support in Word' : 'Microsoft Word format'}
+                </p>
               </div>
             </div>
             <FileDown size={20} className="text-gray-400 group-hover:text-primary" />
@@ -123,8 +174,17 @@ export function ExportModal({ onClose }: ExportModalProps) {
             <div className="flex items-center space-x-3">
               <FileType size={24} className="text-gray-600 group-hover:text-primary" />
               <div className="text-left">
-                <p className="font-medium text-gray-900">PDF Document (.pdf)</p>
-                <p className="text-xs text-gray-500">Portable document format</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-gray-900">PDF Document (.pdf)</p>
+                  {hasBengali && (
+                    <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full font-semibold">
+                      ⚠ Bengali not supported
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500">
+                  {hasBengali ? 'Will show garbled text - use TXT or DOCX instead' : 'Portable document format'}
+                </p>
               </div>
             </div>
             <FileDown size={20} className="text-gray-400 group-hover:text-primary" />
