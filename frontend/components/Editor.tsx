@@ -40,6 +40,9 @@ export default function Editor() {
   const [showTransliteration, setShowTransliteration] = useState(false);
   const [currentWord, setCurrentWord] = useState('');
   const [translitDropdownPos, setTranslitDropdownPos] = useState({ top: 0, left: 0 });
+  
+  // Flag to prevent auto-check immediately after applying suggestions
+  const [skipNextAutoCheck, setSkipNextAutoCheck] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -161,7 +164,29 @@ export default function Editor() {
     [editor, errors.length]
   );
 
+  // Sync editor with translatedContent when suggestions are applied
   useEffect(() => {
+    if (editor && translatedContent && translatedContent !== content) {
+      // Update editor content when suggestions are applied
+      const currentContent = editor.getText();
+      if (currentContent !== translatedContent) {
+        // Set flag to skip next auto-check (suggestions just applied)
+        setSkipNextAutoCheck(true);
+        editor.commands.setContent(translatedContent);
+        setContent(translatedContent);
+        
+        // Reset flag after a short delay
+        setTimeout(() => setSkipNextAutoCheck(false), 3000);
+      }
+    }
+  }, [translatedContent, editor]);
+
+  useEffect(() => {
+    // Skip auto-check if suggestions were just applied
+    if (skipNextAutoCheck) {
+      return;
+    }
+    
     if (content && content.trim().length > 0) {
       detectLanguageAuto(content);
       autoCheckBengali(content);  // Auto-check Bengali text
@@ -171,7 +196,7 @@ export default function Editor() {
         setErrors([]);
       }
     }
-  }, [content, errors.length]);
+  }, [content, errors.length, skipNextAutoCheck]);
 
   // Check for English word and show transliteration dropdown
   const checkForEnglishWord = useCallback((editor: any) => {

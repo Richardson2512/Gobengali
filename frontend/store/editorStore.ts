@@ -107,13 +107,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const error = state.errors.find(e => e.id === errorId);
     
     if (error) {
-      // Update content with suggestion
-      const content = state.translatedContent;
-      const before = content.substring(0, error.offset);
-      const after = content.substring(error.offset + error.length);
+      // Get current editor content (prefer content over translatedContent)
+      const currentText = state.content || state.translatedContent;
+      const before = currentText.substring(0, error.offset);
+      const after = currentText.substring(error.offset + error.length);
       const newContent = before + suggestion + after;
       
+      // Update both content and translatedContent to keep in sync
       set({
+        content: newContent,
         translatedContent: newContent,
         errors: state.errors.filter(e => e.id !== errorId)
       });
@@ -128,21 +130,24 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   
   applyAllSuggestions: () => {
     const state = get();
-    let content = state.translatedContent;
+    // Get current editor content (prefer content over translatedContent)
+    let newContent = state.content || state.translatedContent;
     
     // Sort errors by offset in descending order to avoid offset shifts
     const sortedErrors = [...state.errors].sort((a, b) => b.offset - a.offset);
     
     sortedErrors.forEach(error => {
       if (error.suggestions.length > 0) {
-        const before = content.substring(0, error.offset);
-        const after = content.substring(error.offset + error.length);
-        content = before + error.suggestions[0] + after;
+        const before = newContent.substring(0, error.offset);
+        const after = newContent.substring(error.offset + error.length);
+        newContent = before + error.suggestions[0] + after;
       }
     });
     
+    // Update both content and translatedContent to keep in sync
     set({
-      translatedContent: content,
+      content: newContent,
+      translatedContent: newContent,
       errors: []
     });
   },
