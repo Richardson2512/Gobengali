@@ -1,0 +1,58 @@
+# AI Model Dependencies for GoBengali
+# Install with: pip install -r requirements-ai-models.txt
+
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# AI/ML Models
+transformers==4.35.0  # Hugging Face models (NLLB, IndicBERT)
+torch==2.1.0  # PyTorch (CPU version)
+# For GPU support, use: torch==2.1.0+cu118 or torch==2.1.0+cu121
+sentencepiece==0.1.99  # Required for NLLB tokenizer
+protobuf==4.25.0  # Required for model serialization
+accelerate==0.24.0  # Faster model loading
+safetensors==0.4.1  # Secure model loading
+
+# Spelling Correction
+symspellpy==6.7.7  # Fast spell checking
+
+# Language Detection
+langdetect==1.0.9  # Detect language of input text
+
+# NLP Utilities
+nltk==3.8.1  # Natural Language Toolkit
+regex==2023.10.3  # Advanced regex for text processing
+
+# API & Utils
+python-multipart==0.0.6
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
+aiofiles==23.2.1
+httpx==0.25.2
+
+# Database (if needed)
+motor==3.3.2  # MongoDB async driver
+redis==5.0.1  # Redis for caching
+
+# Monitoring & Logging
+python-json-logger==2.0.7
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Model Download Sizes:
+# facebook/nllb-200-distilled-600M: ~1.2GB
+# facebook/nllb-200-distilled-1.3B: ~2.6GB
+# ai4bharat/IndicBERTv2-MLM-only: ~560MB
+# Total: ~2-3GB for all models
+
+# System Requirements:
+# - RAM: 8GB minimum, 16GB recommended
+# - Disk: 5GB free space for models
+# - GPU: Optional (NVIDIA with CUDA for faster inference)
+
