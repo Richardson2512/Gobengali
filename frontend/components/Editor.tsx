@@ -242,10 +242,13 @@ export default function Editor() {
     // Check if it's an English word (letters only, 2+ chars)
     const isEnglishWord = lastWord && /^[a-zA-Z]{2,}$/.test(lastWord);
     const isMixedWord = lastWord && /[a-zA-Z]/.test(lastWord) && lastWord.length >= 2;
+    const isBengaliWord = lastWord && /[\u0980-\u09FF]+/.test(lastWord) && lastWord.length >= 1;
     
-    // Show dropdown only for English or mixed English-Bengali words
-    // Pure Bengali words don't get dropdown (user finished transliterating)
-    if (isEnglishWord || isMixedWord) {
+    // Show dropdown for:
+    // 1. Pure English words (typing)
+    // 2. Mixed words (editing)
+    // 3. Bengali words (when backspacing to allow re-selection)
+    if (isEnglishWord || isMixedWord || isBengaliWord) {
       // Get word start position
       const wordStart = from - lastWord.length;
       

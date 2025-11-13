@@ -17,7 +17,7 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
 
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (word.length < 2) return;
+      if (word.length < 1) return;
       
       setLoading(true);
       try {
@@ -25,12 +25,9 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
         const isBengali = /[\u0980-\u09FF]/.test(word);
         
         if (isBengali) {
-          // For Bengali words, show common similar words or corrections
-          // This helps when user is editing/backspacing a Bengali word
-          const commonSuggestions = [
-            { text: word, score: 1.0 }  // Show the current word
-          ];
-          setSuggestions(commonSuggestions);
+          // For Bengali words being edited, show variations and common alternatives
+          const bengaliSuggestions = getBengaliWordSuggestions(word);
+          setSuggestions(bengaliSuggestions);
         } else {
           // For English words, get transliteration from API
           const result = await transliterate({ text: word, max_suggestions: 4 });
@@ -49,6 +46,52 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
 
     fetchSuggestions();
   }, [word]);
+
+  // Generate Bengali word suggestions based on the current word
+  const getBengaliWordSuggestions = (bengaliWord: string): TransliterationSuggestion[] => {
+    const suggestions: TransliterationSuggestion[] = [];
+    
+    // Always include the current word first
+    suggestions.push({ text: bengaliWord, score: 1.0 });
+    
+    // Common Bengali word patterns and variations
+    const commonWords: { [key: string]: string[] } = {
+      'হ': ['হ্যা', 'হও', 'হাও', 'হাই', 'হয়'],
+      'হও': ['হও', 'হাও', 'হওয়া', 'হওয়ার'],
+      'হওও': ['হওও', 'হাওয়া', 'হাও'],
+      'আ': ['আমি', 'আর', 'আছে', 'আপনি'],
+      'আর': ['আর', 'আরে', 'আরও', 'আরএ'],
+      'ই': ['ই', 'ইস', 'ইউ', 'ইওউ'],
+      'হ্যা': ['হ্যাঁ', 'হ্যালো', 'হ্যাপি'],
+      'হাই': ['হাই', 'হাইতি', 'হাওয়া'],
+      'হে': ['হে', 'হেই', 'হেলো', 'হেই'],
+      'কে': ['কেমন', 'কে', 'কেউ', 'কেন'],
+      'কি': ['কি', 'কিভাবে', 'কিন্তু', 'কিছু'],
+      'তু': ['তুমি', 'তুই', 'তুম্মা'],
+      'আমি': ['আমি', 'আমরা', 'আমার'],
+      'তুমি': ['তুমি', 'তোমরা', 'তোমার'],
+    };
+    
+    // Check if we have predefined suggestions for this word
+    if (commonWords[bengaliWord]) {
+      commonWords[bengaliWord].slice(0, 3).forEach((suggestion, idx) => {
+        if (suggestion !== bengaliWord) {
+          suggestions.push({ text: suggestion, score: 0.9 - (idx * 0.1) });
+        }
+      });
+    }
+    
+    // If word is short, try to match partial patterns
+    if (bengaliWord.length <= 2) {
+      Object.keys(commonWords).forEach(key => {
+        if (key.startsWith(bengaliWord) && key !== bengaliWord && suggestions.length < 4) {
+          suggestions.push({ text: key, score: 0.7 });
+        }
+      });
+    }
+    
+    return suggestions.slice(0, 4);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
