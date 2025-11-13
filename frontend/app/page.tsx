@@ -559,8 +559,11 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="font-bold text-gray-900 mb-4">GoBengali</h3>
-              <p className="text-gray-600 text-sm">Empowering Bengali Writers</p>
+              <Link href="/" className="flex items-center gap-2 mb-4">
+                <img src="/logo.png" alt="GoBengali Logo" className="h-8 w-auto" />
+                <span className="text-xl font-bold text-gray-900">GoBengali</span>
+              </Link>
+              <p className="text-gray-600 text-sm">Empowering Bengali Writers with AI-powered tools</p>
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Product</h4>

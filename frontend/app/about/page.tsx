@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Heart, Target, Users, Zap, Globe, Award } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 export default function AboutPage() {
   return (
@@ -165,6 +166,8 @@ export default function AboutPage() {
           </Link>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }

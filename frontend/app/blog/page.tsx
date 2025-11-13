@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { BookOpen, Calendar, User, ArrowRight, Tag } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 export default function BlogPage() {
   return (
@@ -170,6 +171,8 @@ export default function BlogPage() {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { BookOpen, Code, Terminal, Globe, Type, FileText, Zap } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 export default function DocumentationPage() {
   return (
@@ -234,6 +235,8 @@ export default function DocumentationPage() {
           </main>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

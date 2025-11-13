@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { BookOpen, Video, FileText, Lightbulb, Target, Users } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 export default function GuidesPage() {
   return (
@@ -208,6 +209,8 @@ export default function GuidesPage() {
           </Link>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }

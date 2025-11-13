@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { CheckCircle, Globe, BookOpen, Sparkles, Type, FileDown, Zap } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 export default function FeaturesPage() {
   return (
@@ -223,6 +224,8 @@ export default function FeaturesPage() {
           </Link>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }

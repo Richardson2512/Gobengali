@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { HelpCircle, Mail, MessageCircle, Book, Search, ChevronDown } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 export default function SupportPage() {
   return (
@@ -168,6 +169,8 @@ export default function SupportPage() {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
