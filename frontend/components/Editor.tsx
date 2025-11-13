@@ -166,20 +166,29 @@ export default function Editor() {
 
   // Sync editor with translatedContent when suggestions are applied
   useEffect(() => {
-    if (editor && translatedContent && translatedContent !== content) {
+    if (!editor) return;
+    
+    if (translatedContent && translatedContent !== content) {
       // Update editor content when suggestions are applied
       const currentContent = editor.getText();
       if (currentContent !== translatedContent) {
+        console.log('Applying suggestion to editor:', translatedContent);
+        
         // Set flag to skip next auto-check (suggestions just applied)
         setSkipNextAutoCheck(true);
-        editor.commands.setContent(translatedContent);
+        
+        // Force editor update with proper HTML formatting
+        editor.commands.setContent(translatedContent, false);
+        editor.commands.focus('end');
+        
+        // Update content state
         setContent(translatedContent);
         
         // Reset flag after a short delay
         setTimeout(() => setSkipNextAutoCheck(false), 3000);
       }
     }
-  }, [translatedContent, editor]);
+  }, [translatedContent, editor, content]);
 
   useEffect(() => {
     // Skip auto-check if suggestions were just applied

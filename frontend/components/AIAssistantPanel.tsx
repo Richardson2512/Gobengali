@@ -7,7 +7,14 @@ import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 export function AIAssistantPanel() {
-  const { errors, applySuggestion, ignoreError, applyAllSuggestions, setActiveErrorId, activeErrorId } = useEditorStore();
+  const { errors, applySuggestion, ignoreError, applyAllSuggestions, setActiveErrorId, activeErrorId, content } = useEditorStore();
+  
+  // Log when errors change for debugging
+  useEffect(() => {
+    if (errors.length > 0) {
+      console.log('AI Assistant: Showing', errors.length, 'suggestions');
+    }
+  }, [errors]);
 
   const spellingErrors = errors.filter(e => e.type === 'spelling');
   const grammarErrors = errors.filter(e => e.type === 'grammar');
@@ -42,7 +49,14 @@ export function AIAssistantPanel() {
 
   // Reject all errors
   const rejectAllSuggestions = () => {
+    console.log('Rejecting all suggestions');
     errors.forEach(error => ignoreError(error.id));
+  };
+  
+  // Apply all with logging
+  const handleApplyAll = () => {
+    console.log('Applying all suggestions. Current errors:', errors.length);
+    applyAllSuggestions();
   };
 
   return (
@@ -61,7 +75,7 @@ export function AIAssistantPanel() {
         {errors.length > 0 && (
           <div className="flex gap-2">
             <button
-              onClick={applyAllSuggestions}
+              onClick={handleApplyAll}
               className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               <CheckCheck size={16} />
@@ -129,6 +143,10 @@ interface CorrectionCardProps {
 }
 
 function CorrectionCard({ error, isActive, onAccept, onReject, onHover }: CorrectionCardProps) {
+  const handleAccept = (suggestion: string) => {
+    console.log('Accepting suggestion:', error.originalText, '→', suggestion);
+    onAccept(suggestion);
+  };
   const getTypeInfo = (type: string) => {
     switch (type) {
       case 'spelling':
@@ -191,23 +209,23 @@ function CorrectionCard({ error, isActive, onAccept, onReject, onHover }: Correc
         </div>
       )}
 
-      {/* Accept/Reject Actions */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => onAccept(topSuggestion)}
-          className="flex-1 bg-green-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
-        >
-          <Check size={16} />
-          Accept
-        </button>
-        <button
-          onClick={onReject}
-          className="flex-1 bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-300 transition-colors flex items-center justify-center gap-2"
-        >
-          <X size={16} />
-          Reject
-        </button>
-      </div>
+            {/* Accept/Reject Actions */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleAccept(topSuggestion)}
+                className="flex-1 bg-green-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
+              >
+                <Check size={16} />
+                Accept
+              </button>
+              <button
+                onClick={onReject}
+                className="flex-1 bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-300 transition-colors flex items-center justify-center gap-2"
+              >
+                <X size={16} />
+                Reject
+              </button>
+            </div>
 
       {/* Additional Suggestions (if any) */}
       {error.suggestions && error.suggestions.length > 1 && (
@@ -217,7 +235,7 @@ function CorrectionCard({ error, isActive, onAccept, onReject, onHover }: Correc
             {error.suggestions.slice(1, 3).map((suggestion: string, idx: number) => (
               <button
                 key={idx}
-                onClick={() => onAccept(suggestion)}
+                onClick={() => handleAccept(suggestion)}
                 className="px-3 py-1.5 text-sm bg-gray-50 hover:bg-green-50 hover:text-green-700 border border-gray-200 hover:border-green-300 rounded-lg transition-colors bengali-text font-medium"
               >
                 {suggestion}

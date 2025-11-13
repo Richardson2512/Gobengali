@@ -91,12 +91,10 @@ export default function Home() {
             </div>
           </div>
 
-          {/* AI Assistant Panel */}
-          {isPanelOpen && (
-            <div className="w-96 animate-slide-in" style={{ minHeight: '800px' }}>
-              <AIAssistantPanel />
-            </div>
-          )}
+          {/* AI Assistant Panel - Always visible */}
+          <div className="w-96" style={{ minHeight: '800px' }}>
+            <AIAssistantPanel />
+          </div>
         </div>
       </main>
 
