@@ -179,8 +179,16 @@ class GrammarService:
         """
         Compare original and corrected text to identify errors.
         Uses diff algorithm to find specific changes.
+        Filters out T5 special tokens like <extra_id_0>
         """
-        if original == corrected:
+        # Filter out T5 special tokens from corrected text
+        import re
+        corrected = re.sub(r'<extra_id_\d+>', '', corrected).strip()
+        corrected = re.sub(r'<pad>', '', corrected).strip()
+        corrected = re.sub(r'</s>', '', corrected).strip()
+        corrected = re.sub(r'<unk>', '', corrected).strip()
+        
+        if original == corrected or not corrected:
             return []
         
         errors = []
@@ -192,6 +200,10 @@ class GrammarService:
         # Find differences
         for i, (orig, corr) in enumerate(zip(original_words, corrected_words)):
             if orig != corr:
+                # Skip if correction is empty or a special token
+                if not corr or corr.startswith('<'):
+                    continue
+                
                 # Calculate offset
                 offset = len(' '.join(original_words[:i])) + (1 if i > 0 else 0)
                 
