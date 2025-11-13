@@ -21,11 +21,24 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
       
       setLoading(true);
       try {
-        const result = await transliterate({ text: word, max_suggestions: 4 });
-        setSuggestions(result.suggestions);
+        // Check if word is Bengali or English
+        const isBengali = /[\u0980-\u09FF]/.test(word);
+        
+        if (isBengali) {
+          // For Bengali words, show common similar words or corrections
+          // This helps when user is editing/backspacing a Bengali word
+          const commonSuggestions = [
+            { text: word, score: 1.0 }  // Show the current word
+          ];
+          setSuggestions(commonSuggestions);
+        } else {
+          // For English words, get transliteration from API
+          const result = await transliterate({ text: word, max_suggestions: 4 });
+          setSuggestions(result.suggestions);
+        }
       } catch (error) {
         console.error('Transliteration failed:', error);
-        // Mock suggestions as fallback
+        // Fallback suggestions
         setSuggestions([
           { text: word, score: 1.0 }
         ]);

@@ -59,6 +59,14 @@ export default function Editor() {
       attributes: {
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
       },
+      handleKeyDown: (view, event) => {
+        // Check for transliteration on any text editing action
+        if (event.key === 'Backspace' || event.key === 'Delete') {
+          // Delay check to allow deletion to process first
+          setTimeout(() => checkForEnglishWord(editor), 10);
+        }
+        return false; // Let the editor handle the key normally
+      },
     },
     onUpdate: ({ editor }) => {
       const text = editor.getText().trim();
@@ -71,7 +79,11 @@ export default function Editor() {
         updateStats(0, 0);
       }
       
-      // Check for English word typing (for transliteration)
+      // Check for word typing (for transliteration) - works for both typing and editing
+      checkForEnglishWord(editor);
+    },
+    onSelectionUpdate: ({ editor }) => {
+      // Also check when cursor moves (clicking into a word)
       checkForEnglishWord(editor);
     },
     onCreate: ({ editor }) => {
@@ -212,34 +224,50 @@ export default function Editor() {
     }
   }, [content, errors.length, skipNextAutoCheck]);
 
-  // Check for English word and show transliteration dropdown
+  // Check for current word and show transliteration dropdown
   const checkForEnglishWord = useCallback((editor: any) => {
     if (!editor) return;
     
     const { state, view } = editor;
     const { from } = state.selection;
     
-    // Get text before cursor
+    // Get text before cursor (more context for better word detection)
     const textBefore = state.doc.textBetween(Math.max(0, from - 50), from, ' ');
-    const words = textBefore.split(/\s+/);
-    const lastWord = words[words.length - 1];
+    const textAfter = state.doc.textBetween(from, Math.min(state.doc.content.size, from + 10), ' ');
+    
+    // Split and get the current word being typed/edited
+    const wordsBefore = textBefore.split(/\s+/);
+    const lastWord = wordsBefore[wordsBefore.length - 1];
     
     // Check if it's an English word (letters only, 2+ chars)
-    if (lastWord && /^[a-zA-Z]{2,}$/.test(lastWord)) {
+    const isEnglishWord = lastWord && /^[a-zA-Z]{2,}$/.test(lastWord);
+    const isMixedWord = lastWord && /[a-zA-Z]/.test(lastWord) && lastWord.length >= 2;
+    
+    // Show dropdown only for English or mixed English-Bengali words
+    // Pure Bengali words don't get dropdown (user finished transliterating)
+    if (isEnglishWord || isMixedWord) {
       // Get word start position
       const wordStart = from - lastWord.length;
       
-      // Get DOM coordinates (viewport-relative)
-      const startCoords = view.coordsAtPos(wordStart);
-      const endCoords = view.coordsAtPos(from);
-      
-      // These coordinates are already viewport-relative, use them directly
-      setTranslitDropdownPos({ 
-        top: endCoords.bottom + 5,  // Just below the cursor
-        left: startCoords.left      // Aligned with word start
-      });
-      setCurrentWord(lastWord);
-      setShowTransliteration(true);
+      try {
+        // Get DOM coordinates (viewport-relative)
+        const startCoords = view.coordsAtPos(wordStart);
+        const endCoords = view.coordsAtPos(from);
+        
+        // Position dropdown below cursor
+        setTranslitDropdownPos({ 
+          top: endCoords.bottom + 5,
+          left: startCoords.left
+        });
+        
+        // For Bengali words, extract the English equivalent attempt or show suggestions
+        const wordToTransliterate = isEnglishWord ? lastWord : lastWord;
+        setCurrentWord(wordToTransliterate);
+        setShowTransliteration(true);
+      } catch (error) {
+        console.error('Error positioning dropdown:', error);
+        setShowTransliteration(false);
+      }
     } else {
       setShowTransliteration(false);
     }
