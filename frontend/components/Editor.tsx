@@ -120,6 +120,8 @@ export default function Editor() {
       try {
         setIsAnalyzing(true);
         
+        console.log('🔍 Checking Bengali text:', text);
+        
         // Call analyze endpoint for Bengali text
         const result = await analyzeText({
           text: text,
@@ -127,6 +129,8 @@ export default function Editor() {
           checkGrammar: true,
           checkSpelling: true,
         });
+
+        console.log('✅ Analysis result:', result.errors.length, 'errors found');
 
         // Only set errors if there are actual errors detected
         if (result.errors && result.errors.length > 0) {
@@ -143,6 +147,7 @@ export default function Editor() {
             confidence: err.confidence,
           }));
 
+          console.log('📝 Setting errors in store:', formattedErrors);
           setErrors(formattedErrors);
 
           // Apply error highlights
@@ -151,44 +156,52 @@ export default function Editor() {
           }
         } else {
           // Clear errors if API returns no errors
+          console.log('✨ No errors found, clearing');
           setErrors([]);
         }
       } catch (error: any) {
-        console.error('Auto-check failed:', error);
+        console.error('❌ Auto-check failed:', error);
         // Clear errors on error to avoid showing stale data
         setErrors([]);
       } finally {
         setIsAnalyzing(false);
       }
-    }, 2000),  // Check after 2 seconds of no typing
+    }, 1500),  // Check after 1.5 seconds of no typing (faster response)
     [editor, errors.length]
   );
 
-  // Sync editor with translatedContent when suggestions are applied
+  // Watch for external content updates (from Accept/Accept All)
+  const [lastAppliedContent, setLastAppliedContent] = useState('');
+  
   useEffect(() => {
     if (!editor) return;
     
-    if (translatedContent && translatedContent !== content) {
-      // Update editor content when suggestions are applied
-      const currentContent = editor.getText();
-      if (currentContent !== translatedContent) {
-        console.log('Applying suggestion to editor:', translatedContent);
-        
-        // Set flag to skip next auto-check (suggestions just applied)
-        setSkipNextAutoCheck(true);
-        
-        // Force editor update with proper HTML formatting
-        editor.commands.setContent(translatedContent, false);
-        editor.commands.focus('end');
-        
-        // Update content state
-        setContent(translatedContent);
-        
-        // Reset flag after a short delay
-        setTimeout(() => setSkipNextAutoCheck(false), 3000);
-      }
+    // Get the current editor text
+    const editorText = editor.getText();
+    
+    // Check if content from store is different from editor AND from last applied
+    if (content && content !== editorText && content !== lastAppliedContent) {
+      console.log('🔄 Syncing editor with store content');
+      console.log('Editor has:', editorText);
+      console.log('Store has:', content);
+      
+      // Set flag to skip auto-check
+      setSkipNextAutoCheck(true);
+      
+      // Update editor with the new content
+      editor.commands.setContent(content, false);
+      editor.commands.focus('end');
+      
+      // Remember this content to avoid loops
+      setLastAppliedContent(content);
+      
+      // Reset flag after delay
+      setTimeout(() => {
+        setSkipNextAutoCheck(false);
+        setLastAppliedContent('');
+      }, 3000);
     }
-  }, [translatedContent, editor, content]);
+  }, [content, editor]);
 
   useEffect(() => {
     // Skip auto-check if suggestions were just applied

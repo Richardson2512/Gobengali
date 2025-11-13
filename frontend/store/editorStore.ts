@@ -106,20 +106,35 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const state = get();
     const error = state.errors.find(e => e.id === errorId);
     
-    if (error) {
-      // Get current editor content (prefer content over translatedContent)
-      const currentText = state.content || state.translatedContent;
-      const before = currentText.substring(0, error.offset);
-      const after = currentText.substring(error.offset + error.length);
-      const newContent = before + suggestion + after;
-      
-      // Update both content and translatedContent to keep in sync
-      set({
-        content: newContent,
-        translatedContent: newContent,
-        errors: state.errors.filter(e => e.id !== errorId)
-      });
+    if (!error) {
+      console.error('Error not found:', errorId);
+      return;
     }
+    
+    // Work directly with current content
+    const currentText = state.content;
+    
+    console.log('Applying suggestion:', {
+      errorId,
+      offset: error.offset,
+      length: error.length,
+      original: error.originalText,
+      suggestion,
+      currentText: currentText.substring(error.offset, error.offset + error.length)
+    });
+    
+    const before = currentText.substring(0, error.offset);
+    const after = currentText.substring(error.offset + error.length);
+    const newContent = before + suggestion + after;
+    
+    console.log('New content:', newContent);
+    
+    // Update content and set a flag for editor to pick up
+    set({
+      content: newContent,
+      translatedContent: newContent,
+      errors: state.errors.filter(e => e.id !== errorId)
+    });
   },
   
   ignoreError: (errorId) => {
@@ -130,21 +145,26 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   
   applyAllSuggestions: () => {
     const state = get();
-    // Get current editor content (prefer content over translatedContent)
-    let newContent = state.content || state.translatedContent;
+    let newContent = state.content;
+    
+    console.log('Apply All: Starting with', state.errors.length, 'errors');
+    console.log('Current content:', newContent);
     
     // Sort errors by offset in descending order to avoid offset shifts
     const sortedErrors = [...state.errors].sort((a, b) => b.offset - a.offset);
     
     sortedErrors.forEach(error => {
       if (error.suggestions.length > 0) {
+        console.log('Replacing:', error.originalText, '→', error.suggestions[0], 'at offset', error.offset);
         const before = newContent.substring(0, error.offset);
         const after = newContent.substring(error.offset + error.length);
         newContent = before + error.suggestions[0] + after;
       }
     });
     
-    // Update both content and translatedContent to keep in sync
+    console.log('Apply All: New content:', newContent);
+    
+    // Update content
     set({
       content: newContent,
       translatedContent: newContent,
