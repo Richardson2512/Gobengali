@@ -17,9 +17,14 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
 
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (word.length < 1) return;
+      if (word.length < 1) {
+        console.log('Word too short, not fetching');
+        return;
+      }
       
+      console.log('📝 Fetching transliteration for:', word);
       setLoading(true);
+      
       try {
         // Always use API for transliteration - no hardcoded data!
         const result = await transliterate({ 
@@ -28,9 +33,11 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
           // Include reverse transliteration flag for Bengali words
           reverse: /[\u0980-\u09FF]/.test(word)
         });
+        
+        console.log('✅ Got suggestions:', result.suggestions);
         setSuggestions(result.suggestions);
       } catch (error) {
-        console.error('Transliteration API failed:', error);
+        console.error('❌ Transliteration API failed:', error);
         // If API fails, don't show suggestions
         setSuggestions([]);
       } finally {
@@ -66,18 +73,30 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [suggestions, selectedIndex, onSelect, onClose]);
 
+  console.log('🎨 TransliterationDropdown render:', { 
+    word, 
+    loading, 
+    suggestionsCount: suggestions.length,
+    position 
+  });
+
   if (loading) {
     return (
       <div 
-        className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-xl px-4 py-3"
-        style={{ top: position.top, left: position.left }}
+        className="fixed z-50 bg-white border border-gray-300 rounded-lg shadow-xl px-4 py-3"
+        style={{ top: `${position.top}px`, left: `${position.left}px` }}
       >
         <p className="text-sm text-gray-500">Loading suggestions...</p>
       </div>
     );
   }
 
-  if (suggestions.length === 0) return null;
+  if (suggestions.length === 0) {
+    console.log('⚠️ No suggestions to show');
+    return null;
+  }
+
+  console.log('✅ Rendering dropdown with', suggestions.length, 'suggestions');
 
   return (
     <div 

@@ -239,16 +239,21 @@ export default function Editor() {
     const wordsBefore = textBefore.split(/\s+/);
     const lastWord = wordsBefore[wordsBefore.length - 1];
     
+    console.log('🔍 Checking word:', lastWord, 'Length:', lastWord?.length);
+    
     // Check if it's an English word (letters only, 2+ chars)
     const isEnglishWord = lastWord && /^[a-zA-Z]{2,}$/.test(lastWord);
     const isMixedWord = lastWord && /[a-zA-Z]/.test(lastWord) && lastWord.length >= 2;
     const isBengaliWord = lastWord && /[\u0980-\u09FF]+/.test(lastWord) && lastWord.length >= 1;
+    
+    console.log('Word types:', { isEnglishWord, isMixedWord, isBengaliWord });
     
     // Show dropdown for:
     // 1. Pure English words (typing)
     // 2. Mixed words (editing)
     // 3. Bengali words (when backspacing to allow re-selection)
     if (isEnglishWord || isMixedWord || isBengaliWord) {
+      console.log('✅ Should show dropdown for:', lastWord);
       // Get word start position
       const wordStart = from - lastWord.length;
       
@@ -263,10 +268,14 @@ export default function Editor() {
           left: startCoords.left
         });
         
+        console.log('📍 Dropdown position:', { top: endCoords.bottom + 5, left: startCoords.left });
+        
         // For Bengali words, extract the English equivalent attempt or show suggestions
         const wordToTransliterate = isEnglishWord ? lastWord : lastWord;
         setCurrentWord(wordToTransliterate);
         setShowTransliteration(true);
+        
+        console.log('✅ Dropdown should be visible now for word:', wordToTransliterate);
       } catch (error) {
         console.error('Error positioning dropdown:', error);
         setShowTransliteration(false);
@@ -541,12 +550,15 @@ export default function Editor() {
 
       {/* Transliteration Dropdown */}
       {showTransliteration && currentWord && (
-        <TransliterationDropdown
-          position={translitDropdownPos}
-          word={currentWord}
-          onSelect={handleSelectSuggestion}
-          onClose={() => setShowTransliteration(false)}
-        />
+        <>
+          {console.log('🎯 Rendering TransliterationDropdown:', { currentWord, position: translitDropdownPos, showTransliteration })}
+          <TransliterationDropdown
+            position={translitDropdownPos}
+            word={currentWord}
+            onSelect={handleSelectSuggestion}
+            onClose={() => setShowTransliteration(false)}
+          />
+        </>
       )}
 
       {/* Error Suggestion Dropdown */}
