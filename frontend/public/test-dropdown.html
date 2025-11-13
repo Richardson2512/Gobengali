@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoBengali - Dropdown Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        #editor {
+            width: 100%;
+            min-height: 200px;
+            padding: 20px;
+            border: 2px solid #22c55e;
+            border-radius: 8px;
+            font-size: 18px;
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+        #dropdown {
+            position: absolute;
+            background: white;
+            border: 2px solid #22c55e;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+            min-width: 200px;
+        }
+        .suggestion {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 20px;
+        }
+        .suggestion:hover {
+            background: #22c55e;
+            color: white;
+        }
+        #status {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f9ff;
+            border-left: 4px solid #22c55e;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 GoBengali Dropdown Test</h1>
+    
+    <div id="status">
+        <strong>Status:</strong> <span id="statusText">Initializing...</span><br>
+        <strong>Backend:</strong> <span id="backendStatus">Checking...</span><br>
+        <strong>AI Model:</strong> indic-transliteration<br>
+        <strong>Last API Call:</strong> <span id="lastCall">None</span>
+    </div>
+
+    <p>Type English words below and watch for dropdown suggestions:</p>
+    
+    <textarea id="editor" placeholder="Type 'hello' here..."></textarea>
+    
+    <div id="dropdown"></div>
+
+    <div id="log" style="margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 4px; font-family: monospace; font-size: 12px;"></div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+        const editor = document.getElementById('editor');
+        const dropdown = document.getElementById('dropdown');
+        const statusText = document.getElementById('statusText');
+        const backendStatus = document.getElementById('backendStatus');
+        const lastCall = document.getElementById('lastCall');
+        const logDiv = document.getElementById('log');
+
+        function log(message, color = 'black') {
+            const time = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div style="color:${color}">[${time}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Test backend on load
+        fetch(`${API_URL}/transliterate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: 'test', max_suggestions: 2 })
+        })
+        .then(res => res.json())
+        .then(data => {
+            backendStatus.textContent = '✅ Connected!';
+            backendStatus.style.color = 'green';
+            log('✅ Backend connection successful!', 'green');
+            log(`API URL: ${API_URL}/transliterate`, 'blue');
+            statusText.textContent = 'Ready! Type English words...';
+            statusText.style.color = 'green';
+        })
+        .catch(err => {
+            backendStatus.textContent = '❌ Not connected';
+            backendStatus.style.color = 'red';
+            log('❌ Backend connection failed: ' + err.message, 'red');
+            statusText.textContent = 'Backend not connected';
+        });
+
+        let currentWord = '';
+        
+        editor.addEventListener('input', async (e) => {
+            const text = editor.value;
+            const words = text.split(/\s+/);
+            const lastWord = words[words.length - 1];
+            
+            log(`Typed: "${lastWord}"`, 'gray');
+            
+            // Check if it's an English word (2+ letters)
+            if (lastWord && /^[a-zA-Z]{2,}$/.test(lastWord)) {
+                currentWord = lastWord;
+                log(`🔍 Fetching suggestions for: ${lastWord}`, 'blue');
+                lastCall.textContent = `${API_URL}/transliterate (word: ${lastWord})`;
+                
+                try {
+                    const response = await fetch(`${API_URL}/transliterate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            text: lastWord, 
+                            max_suggestions: 4 
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    log(`✅ Got ${data.suggestions.length} suggestions`, 'green');
+                    
+                    // Show dropdown
+                    dropdown.innerHTML = '<div style="background:#22c55e;color:white;padding:8px;font-weight:bold;border-radius:4px 4px 0 0;">Bengali Suggestions</div>';
+                    
+                    data.suggestions.forEach((sug, idx) => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion';
+                        div.textContent = `${idx + 1}. ${sug.text}`;
+                        div.onclick = () => {
+                            // Replace last word with suggestion
+                            const newText = text.substring(0, text.lastIndexOf(lastWord)) + sug.text + ' ';
+                            editor.value = newText;
+                            dropdown.style.display = 'none';
+                            log(`✅ Selected: ${sug.text}`, 'green');
+                        };
+                        dropdown.appendChild(div);
+                    });
+                    
+                    // Position dropdown below editor
+                    const rect = editor.getBoundingClientRect();
+                    dropdown.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+                    dropdown.style.left = rect.left + 'px';
+                    dropdown.style.display = 'block';
+                    
+                } catch (error) {
+                    log(`❌ API Error: ${error.message}`, 'red');
+                    dropdown.style.display = 'none';
+                }
+            } else {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // Hide dropdown on space
+        editor.addEventListener('keydown', (e) => {
+            if (e.key === ' ' && dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        log('🚀 Test page loaded', 'blue');
+        log('Type English words to test AI transliteration...', 'gray');
+    </script>
+</body>
+</html>
+
