@@ -33,6 +33,8 @@ export default function Editor() {
     setIsFrozen,
     shouldSyncToEditor,
     setShouldSyncToEditor,
+    checkDailyLimits,
+    wordCount: currentWordCount,
   } = useEditorStore();
 
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
@@ -71,11 +73,22 @@ export default function Editor() {
     },
     onUpdate: ({ editor }) => {
       const text = editor.getText().trim();
+      const newWordCount = countWords(text);
+      
+      // Check word limit (free tier only)
+      const { wordLimitReached } = checkDailyLimits();
+      
+      if (wordLimitReached && newWordCount > currentWordCount) {
+        // Prevent adding more words
+        alert('⚠️ Daily limit reached!\n\nYou have written 500 words today.\nUpgrade to Pro for unlimited access or come back tomorrow!');
+        return; // Don't update content
+      }
+      
       setContent(text);
       
       // Update stats
       if (text.length > 0) {
-        updateStats(countWords(text), countCharacters(text));
+        updateStats(newWordCount, countCharacters(text));
       } else {
         updateStats(0, 0);
       }

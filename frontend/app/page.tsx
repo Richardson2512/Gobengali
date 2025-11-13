@@ -4,6 +4,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { Header } from "@/components/Header";
 import { AIAssistantPanel } from "@/components/AIAssistantPanel";
+import { UsageLimitBanner } from "@/components/UsageLimitBanner";
 import { useEditorStore } from "@/store/editorStore";
 
 // Dynamic import to avoid SSR issues with TipTap
@@ -83,6 +84,9 @@ export default function Home() {
       </section>
       
       <main className="container mx-auto px-4 py-6" id="editor-workspace">
+        {/* Usage Limit Banner */}
+        <UsageLimitBanner />
+        
         <div className="flex gap-6 items-start">
           {/* Editor Section */}
           <div className={`flex-1 transition-all duration-300 ${isPanelOpen ? 'mr-0' : 'mr-0'}`}>
