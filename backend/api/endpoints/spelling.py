@@ -1,26 +1,37 @@
-from fastapi import APIRouter, HTTPException, Request
+"""
+Spelling Endpoint - Routes to Spelling Service
+Uses modular Spelling Service (SymSpell + LanguageTool)
+"""
+from fastapi import APIRouter, HTTPException
 import logging
 
 from ..schemas import SpellingCheckRequest, SpellingCheckResponse
+from services.spelling.model import get_spelling_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 @router.post("/check", response_model=SpellingCheckResponse)
-async def check_spelling(request_data: SpellingCheckRequest, request: Request):
+async def check_spelling(request_data: SpellingCheckRequest):
     """
-    Check spelling in Bengali text.
-    Uses BSpell (CNN + BERT) model.
+    Check spelling using dedicated Spelling Service.
+    Primary: SymSpell | Fallback: LanguageTool
     """
     try:
-        model_manager = request.app.state.model_manager
+        service = get_spelling_service()
         
-        errors = await model_manager.check_spelling(request_data.text)
+        if not service.primary_ready and not service.fallback_ready:
+            raise HTTPException(
+                status_code=503,
+                detail="Spelling service still loading. Please wait."
+            )
+        
+        errors = await service.check_spelling(request_data.text)
         
         # Apply corrections to generate corrected text
         corrected_text = request_data.text
         for error in sorted(errors, key=lambda x: x['offset'], reverse=True):
-            if error['suggestions']:
+            if error.get('suggestions'):
                 before = corrected_text[:error['offset']]
                 after = corrected_text[error['offset'] + error['length']:]
                 corrected_text = before + error['suggestions'][0] + after
@@ -30,7 +41,9 @@ async def check_spelling(request_data: SpellingCheckRequest, request: Request):
             corrected_text=corrected_text
         )
     
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Spelling check failed: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Spelling check failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
