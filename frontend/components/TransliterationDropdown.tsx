@@ -21,24 +21,18 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
       
       setLoading(true);
       try {
-        // Check if word is Bengali or English
-        const isBengali = /[\u0980-\u09FF]/.test(word);
-        
-        if (isBengali) {
-          // For Bengali words being edited, show variations and common alternatives
-          const bengaliSuggestions = getBengaliWordSuggestions(word);
-          setSuggestions(bengaliSuggestions);
-        } else {
-          // For English words, get transliteration from API
-          const result = await transliterate({ text: word, max_suggestions: 4 });
-          setSuggestions(result.suggestions);
-        }
+        // Always use API for transliteration - no hardcoded data!
+        const result = await transliterate({ 
+          text: word, 
+          max_suggestions: 4,
+          // Include reverse transliteration flag for Bengali words
+          reverse: /[\u0980-\u09FF]/.test(word)
+        });
+        setSuggestions(result.suggestions);
       } catch (error) {
-        console.error('Transliteration failed:', error);
-        // Fallback suggestions
-        setSuggestions([
-          { text: word, score: 1.0 }
-        ]);
+        console.error('Transliteration API failed:', error);
+        // If API fails, don't show suggestions
+        setSuggestions([]);
       } finally {
         setLoading(false);
       }
@@ -46,117 +40,6 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
 
     fetchSuggestions();
   }, [word]);
-
-  // Generate Bengali word suggestions based on the current word
-  const getBengaliWordSuggestions = (bengaliWord: string): TransliterationSuggestion[] => {
-    // Map Bengali phonetic patterns to possible English equivalents
-    // Then transliterate those to get multiple Bengali options
-    const bengaliToEnglishPatterns: { [key: string]: string[] } = {
-      // Single characters and common starts
-      'হ': ['ha', 'ho', 'he', 'hi'],
-      'আ': ['a', 'aa', 'am', 'ar'],
-      'ই': ['i', 'ee', 'in', 'is'],
-      'ও': ['o', 'oh', 'ou', 'ow'],
-      'ক': ['ka', 'ke', 'ko', 'ki'],
-      'খ': ['kha', 'khe', 'kho'],
-      'গ': ['ga', 'ge', 'go'],
-      'চ': ['cha', 'che', 'cho'],
-      'জ': ['ja', 'je', 'jo'],
-      'ট': ['ta', 'te', 'to'],
-      'ড': ['da', 'de', 'do'],
-      'ত': ['ta', 'te', 'to', 'tha'],
-      'দ': ['da', 'de', 'do', 'dha'],
-      'ন': ['na', 'ne', 'no'],
-      'প': ['pa', 'pe', 'po'],
-      'ব': ['ba', 'be', 'bo', 'va'],
-      'ম': ['ma', 'me', 'mo', 'mi'],
-      'য': ['ya', 'ye', 'jo'],
-      'র': ['ra', 're', 'ro', 'ri'],
-      'ল': ['la', 'le', 'lo', 'li'],
-      'শ': ['sha', 'she', 'sho'],
-      'স': ['sa', 'se', 'so', 'si'],
-      
-      // Common word patterns
-      'হও': ['how', 'ho', 'hao'],
-      'হওও': ['how', 'howo'],
-      'আর': ['are', 'ar', 'arr'],
-      'আরএ': ['are', 'ara'],
-      'ই': ['i', 'ee', 'you'],
-      'ইউ': ['you', 'iu', 'yu'],
-      'ওইল': ['will', 'oil', 'while', 'well'],
-      'হ্যালো': ['hello', 'hallo'],
-      'হাই': ['hi', 'high', 'hai'],
-      'আমি': ['ami', 'me', 'i'],
-      'তুমি': ['tumi', 'you'],
-      'কেমন': ['kemon', 'how'],
-      'ভালো': ['bhalo', 'good', 'valo'],
-    };
-    
-    const suggestions: TransliterationSuggestion[] = [];
-    
-    // Get possible English words for this Bengali word
-    let englishOptions: string[] = [];
-    
-    // Check for exact match
-    if (bengaliToEnglishPatterns[bengaliWord]) {
-      englishOptions = bengaliToEnglishPatterns[bengaliWord];
-    } else {
-      // For partial matches, find words that start with this
-      Object.keys(bengaliToEnglishPatterns).forEach(key => {
-        if (key.startsWith(bengaliWord) || bengaliWord.startsWith(key)) {
-          englishOptions.push(...bengaliToEnglishPatterns[key]);
-        }
-      });
-    }
-    
-    // Remove duplicates
-    englishOptions = [...new Set(englishOptions)];
-    
-    // If we found English equivalents, show their transliterations
-    if (englishOptions.length > 0) {
-      // Show suggestions based on English equivalents
-      const bengaliSuggestions = new Set<string>();
-      
-      englishOptions.slice(0, 4).forEach(eng => {
-        // Generate common Bengali variations for this English word
-        const variations = generateBengaliVariations(eng);
-        variations.forEach(v => bengaliSuggestions.add(v));
-      });
-      
-      // Convert to array and create suggestions
-      Array.from(bengaliSuggestions).slice(0, 4).forEach((text, idx) => {
-        suggestions.push({ text, score: 1.0 - (idx * 0.05) });
-      });
-    } else {
-      // Fallback: show the current word
-      suggestions.push({ text: bengaliWord, score: 1.0 });
-    }
-    
-    return suggestions;
-  };
-  
-  // Generate Bengali variations for an English word
-  const generateBengaliVariations = (englishWord: string): string[] => {
-    // This is a simplified version - you can expand this
-    const variations: { [key: string]: string[] } = {
-      'will': ['উইল', 'ওইল', 'উইল্', 'ওয়িল'],
-      'how': ['হাও', 'হও', 'হাউ', 'হাওয়া'],
-      'are': ['আর', 'আরে', 'আর্', 'এর'],
-      'you': ['ইউ', 'ইউ', 'আপনি', 'তুমি'],
-      'hello': ['হ্যালো', 'হেলো', 'হ্যাল্লো', 'হ্যাঁলো'],
-      'hi': ['হাই', 'হাই', 'হি', 'হে'],
-      'good': ['গুড', 'ভালো', 'ভাল', 'গুদ'],
-      'well': ['ওয়েল', 'ভালো', 'উয়েল'],
-      'oil': ['অয়েল', 'ওইল', 'তেল'],
-      'while': ['ওয়াইল', 'হোয়াইল', 'যখন'],
-      'i': ['আই', 'আমি', 'আই'],
-      'me': ['মি', 'আমি', 'আমাকে'],
-      'ami': ['আমি', 'অমি', 'আম'],
-      'tumi': ['তুমি', 'তুম', 'তুমী'],
-    };
-    
-    return variations[englishWord.toLowerCase()] || [englishWord];
-  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
