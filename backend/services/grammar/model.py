@@ -130,7 +130,8 @@ class GrammarService:
             
             def check_sync():
                 # Create prompt for grammar checking
-                prompt = f"grammar: {text}"
+                # Enhanced prompt for better zero-shot performance
+                prompt = f"Correct Bengali grammar: {text}"
                 
                 inputs = self.primary_tokenizer(
                     prompt,

@@ -28,7 +28,7 @@ class Settings(BaseSettings):
 
     # ML Models
     MODEL_CACHE_DIR: str = "./models"
-    TRANSLATION_MODEL: str = "facebook/nllb-200-distilled-1.3B"
+    TRANSLATION_MODEL: str = "" # Disabled for stability testing
     GRAMMAR_MODEL: str = "ai4bharat/IndicBERTv2-MLM-only"
     SPELLING_MODEL: str = "custom-bspell"
 

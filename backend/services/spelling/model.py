@@ -49,20 +49,37 @@ class SpellingService:
         
         def load():
             from symspellpy import SymSpell, Verbosity
+            import os
             
             sym_spell = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
             
-            # Load Bengali dictionary - AI-powered fuzzy matching
-            # Common Bengali words for the dictionary
-            bengali_words = [
-                ("আমি", 10000), ("তুমি", 8000), ("সে", 8000), ("আমরা", 7000),
-                ("তোমরা", 6000), ("তারা", 6000), ("বাংলা", 9000), ("ভালো", 8000),
-                ("ছিলো", 6000), ("করছে", 7000), ("যাচ্ছে", 7000), ("হয়েছে", 8000),
-                ("গিয়েছে", 7000), ("বই", 7000), ("স্কুল", 7000), ("আছে", 8000)
-            ]
+            # Load Bengali words from file (approx 450k words)
+            dict_path = os.path.join(os.path.dirname(__file__), "bengali_dictionary.txt")
             
-            for word, freq in bengali_words:
-                sym_spell.create_dictionary_entry(word, freq)
+            try:
+                # First load the small core dictionary with frequencies
+                bengali_words = [
+                    ("আমি", 10000), ("তুমি", 8000), ("সে", 8000), ("আমরা", 7000),
+                    ("তোমরা", 6000), ("তারা", 6000), ("বাংলা", 9000), ("ভালো", 8000),
+                    ("ছিলো", 6000), ("করছে", 7000), ("যাচ্ছে", 7000), ("হয়েছে", 8000),
+                    ("গিয়েছে", 7000), ("বই", 7000), ("স্কুল", 7000), ("আছে", 8000)
+                ]
+                for word, freq in bengali_words:
+                    sym_spell.create_dictionary_entry(word, freq)
+
+                # Then load the massive word list
+                if os.path.exists(dict_path):
+                    with open(dict_path, "r", encoding="utf-8") as f:
+                        for line in f:
+                            word = line.strip()
+                            if word:
+                                sym_spell.create_dictionary_entry(word, 1)
+                    logger.info(f"Loaded {sym_spell.word_count} words into SymSpell")
+                else:
+                    logger.warning(f"Dictionary file not found at {dict_path}")
+                    
+            except Exception as e:
+                logger.error(f"Error loading dictionary: {e}")
             
             return sym_spell
         

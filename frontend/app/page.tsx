@@ -8,6 +8,8 @@ import { AIAssistantPanel } from "@/components/AIAssistantPanel";
 import { UsageLimitBanner } from "@/components/UsageLimitBanner";
 import { useEditorStore } from "@/store/editorStore";
 
+import { LANDING_CONTENT } from "@/constants/content";
+
 // Dynamic import to avoid SSR issues with TipTap
 const Editor = dynamic(() => import("@/components/Editor").catch((error) => {
   console.error("Failed to load Editor:", error);
@@ -40,26 +42,25 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100">
         <div className="container mx-auto px-4 py-12 text-center">
           <div className="relative inline-block group cursor-pointer min-w-[800px]">
             {/* Bengali text - shows by default, hides on hover */}
             <h1 className="text-5xl font-bold text-gray-900 mb-4 bengali-text transition-opacity duration-300 group-hover:opacity-0 group-hover:invisible">
-              আপনার বাংলা লেখার সঙ্গী
+              {LANDING_CONTENT.hero.bengaliTitle}
             </h1>
             {/* English text - hidden by default, shows on hover */}
             <h1 className="absolute inset-0 text-5xl font-bold text-gray-900 mb-4 opacity-0 invisible transition-opacity duration-300 group-hover:opacity-100 group-hover:visible whitespace-nowrap">
-              Your Bengali Writing Partner
+              {LANDING_CONTENT.hero.englishTitle}
             </h1>
           </div>
           <p className="text-2xl text-gray-700 mb-6">
-            Your AI Writing Partner for <span className="text-green-600 font-semibold">Bengali that Excels</span>
+            {LANDING_CONTENT.hero.subtitle} <span className="text-green-600 font-semibold">{LANDING_CONTENT.hero.subtitleHighlight}</span>
           </p>
           <p className="text-lg text-gray-600 max-w-4xl mx-auto mb-8">
-            Get instant, context-aware suggestions for grammar, spelling, and style, 
-            so you never have to second-guess your writing again.
+            {LANDING_CONTENT.hero.description}
           </p>
           <div className="flex items-center justify-center gap-8 text-sm text-gray-600">
             <div className="flex items-center gap-2">
@@ -83,11 +84,11 @@ export default function Home() {
           </div>
         </div>
       </section>
-      
+
       <main className="container mx-auto px-4 py-6" id="editor-workspace">
         {/* Usage Limit Banner */}
         <UsageLimitBanner />
-        
+
         <div className="flex gap-6 items-start">
           {/* Editor Section */}
           <div className={`flex-1 transition-all duration-300 ${isPanelOpen ? 'mr-0' : 'mr-0'}`}>
@@ -112,7 +113,7 @@ export default function Home() {
               <p className="text-green-600 font-semibold mb-3">AI Grammar Engine</p>
               <h2 className="text-4xl font-bold text-gray-900 mb-6">Correct Bengali grammar mistakes in seconds</h2>
               <p className="text-lg text-gray-600 mb-8">
-                Don't worry about tricky rules. GoBengali's AI instantly detects and fixes the most complex errors, 
+                Don't worry about tricky rules. GoBengali's AI instantly detects and fixes the most complex errors,
                 so your writing is always clear and professional.
               </p>
               <div className="space-y-4">
@@ -387,7 +388,7 @@ export default function Home() {
                   <div className="w-2 h-2 bg-red-600 rounded-full"></div>
                   <span className="text-sm font-semibold">Grammar</span>
                 </div>
-                
+
                 <div className="mb-6">
                   <p className="text-xs text-gray-500 mb-2 font-semibold">Original:</p>
                   <div className="border-l-4 border-red-200 bg-red-50 pl-4 py-3 rounded-r">
@@ -462,7 +463,7 @@ export default function Home() {
               <p className="text-blue-600 font-semibold mb-3">Style Suggestions</p>
               <h2 className="text-4xl font-bold text-gray-900 mb-6">Write in a way that truly connects</h2>
               <p className="text-lg text-gray-600 mb-8">
-                Beyond grammar and spelling, GoBengali helps you choose the right tone and style for your audience. 
+                Beyond grammar and spelling, GoBengali helps you choose the right tone and style for your audience.
                 From formal business communication to casual social posts.
               </p>
               <div className="space-y-4">

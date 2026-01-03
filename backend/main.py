@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Try production models first, fall back to basic if needed
 try:
     from models.production_model_manager import ProductionModelManager as ModelManager
-    USE_PRODUCTION = True
+    USE_PRODUCTION = False # Temporarily disable production models to debug crash
     logger.info("✓ Using ProductionModelManager (Full AI with mT5 + BSpell)")
 except ImportError as e:
     from models.model_manager import ModelManager
@@ -93,7 +93,7 @@ app.add_middleware(
 )
 
 # Include API router
-app.include_router(api_router)
+app.include_router(api_router, prefix="/api")
 
 # Root endpoint
 @app.get("/")
