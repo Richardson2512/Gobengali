@@ -18,12 +18,12 @@ export function Header() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <Image 
-                src="/logo.png?v=2" 
-                alt="GoBengali Logo" 
-                width={40} 
+              <Image
+                src="/logo.png?v=2"
+                alt="GoBengali Logo"
+                width={40}
                 height={40}
-                className="rounded-lg"
+                className="h-8 w-auto mr-2"
                 unoptimized
               />
               <div>
@@ -40,13 +40,13 @@ export function Header() {
               <div className="text-gray-600">
                 <span className="font-semibold">{characterCount}</span> characters
               </div>
-              
+
               {userTier === 'free' && (
                 <div className="text-orange-600 bg-orange-50 px-3 py-1 rounded-full">
                   Free Plan
                 </div>
               )}
-              
+
               {userTier === 'pro' && (
                 <div className="text-green-600 bg-green-50 px-3 py-1 rounded-full">
                   Pro Plan

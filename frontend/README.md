@@ -1,6 +1,4 @@
-# GoBengali Frontend
-
-Next.js + TypeScript frontend for GoBengali Bengali writing assistant.
+Next.js + TypeScript frontend for GoBengali Bangla writing assistant.
 
 ## 🚀 Quick Start
 
@@ -71,7 +69,7 @@ NEXT_PUBLIC_MAX_FREE_WORDS=1000
 ### TipTap Editor
 - Rich text editing with ProseMirror
 - Inline error highlighting
-- Custom Bengali font support (Noto Sans Bengali)
+- Custom Bangla font support (Noto Sans Bengali)
 - Real-time word/character counting
 
 ### AI Assistant Panel
@@ -83,7 +81,7 @@ NEXT_PUBLIC_MAX_FREE_WORDS=1000
 ### Export System
 - Export to TXT (plain text)
 - Export to DOCX (Microsoft Word)
-- Export to PDF (with Bengali fonts)
+- Export to PDF (with Bangla fonts)
 
 ### State Management
 - Zustand for global state
@@ -123,7 +121,7 @@ Top navigation with:
 Export dialog with:
 - Multiple format options
 - File download handling
-- Bengali font preservation
+- Bangla font preservation
 
 ## 📡 API Integration
 
@@ -153,12 +151,12 @@ const detected = await detectLanguage({
 
 ### TailwindCSS
 - Utility-first CSS framework
-- Custom color scheme for Bengali aesthetics
+- Custom color scheme for Bangla aesthetics
 - Responsive design
 - Dark mode ready
 
 ### Custom Styles
-- Bengali font loading (Noto Sans Bengali)
+- Bangla font loading (Noto Sans Bengali)
 - Error underlines (wavy red/yellow)
 - Smooth animations
 - Accessible design

@@ -81,6 +81,7 @@ export interface ToneChangeResponse {
 export interface TransliterateRequest {
   text: string;
   max_suggestions?: number;
+  reverse?: boolean;
 }
 
 export interface TransliterationSuggestion {

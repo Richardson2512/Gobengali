@@ -1,10 +1,10 @@
 "use client";
 
 import { Editor } from '@tiptap/react';
-import { 
-  Bold, 
-  Italic, 
-  Underline as UnderlineIcon, 
+import {
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
   Strikethrough,
   List,
   ListOrdered,
@@ -25,22 +25,21 @@ interface Props {
 export function SimpleEditorToolbar({ editor }: Props) {
   if (!editor) return null;
 
-  const ToolbarButton = ({ 
-    onClick, 
-    isActive, 
-    icon, 
-    label 
-  }: { 
-    onClick: () => void; 
-    isActive?: boolean; 
-    icon: React.ReactNode; 
+  const ToolbarButton = ({
+    onClick,
+    isActive,
+    icon,
+    label
+  }: {
+    onClick: () => void;
+    isActive?: boolean;
+    icon: React.ReactNode;
     label: string;
   }) => (
     <button
       onClick={onClick}
-      className={`p-2 rounded-md hover:bg-gray-100 transition-colors ${
-        isActive ? 'bg-green-100 text-green-700' : 'text-gray-700'
-      }`}
+      className={`p-2 rounded-md hover:bg-gray-100 transition-colors ${isActive ? 'bg-green-100 text-green-700' : 'text-gray-700'
+        }`}
       title={label}
       type="button"
     >
@@ -154,7 +153,7 @@ export function SimpleEditorToolbar({ editor }: Props) {
       {/* Info */}
       <div className="ml-auto flex items-center gap-3 pl-3 border-l border-gray-300">
         <div className="text-xs text-gray-500">
-          Type English → Get Bengali suggestions
+          Type English → Get Bangla suggestions
         </div>
       </div>
     </div>

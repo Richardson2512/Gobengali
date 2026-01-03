@@ -1,4 +1,4 @@
-# GoBengali - AI-Powered Bengali Writing Assistant
+# GoBengali - AI-Powered Bangla Writing Assistant
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
@@ -8,18 +8,18 @@
 
 ## 🎯 Vision
 
-To make writing, translating, and editing in Bengali effortless and intelligent — empowering journalists, authors, and students to produce flawless Bengali text in real time.
+To make writing, translating, and editing in Bangla effortless and intelligent — empowering journalists, authors, and students to produce flawless Bangla text in real time.
 
 ## ✨ Features
 
-- **🌐 Smart Translation**: Translate from 200+ languages to Bengali using Meta's NLLB-200 model
+- **🌐 Smart Translation**: Translate from 200+ languages to Bangla using Meta's NLLB-200 model
 - **✍️ Grammar Correction**: AI-powered grammar checking with context-aware suggestions
-- **📝 Spelling Validation**: Advanced spelling checker optimized for Bengali script
+- **📝 Spelling Validation**: Advanced spelling checker optimized for Bangla script
 - **💡 Inline Corrections**: Grammarly-like interactive correction experience
 - **🤖 AI Assistant**: Detailed feedback panel with explanations and suggestions
 - **📤 Export Options**: Export to TXT, DOCX, and PDF formats
 - **⚡ Real-time Analysis**: Instant feedback as you type
-- **🎨 Beautiful UI**: Modern, responsive design with Bengali font support
+- **🎨 Beautiful UI**: Modern, responsive design with Bangla font support
 
 ## 🚀 Quick Start
 
@@ -131,7 +131,7 @@ The system uses:
 ## 📡 API Endpoints
 
 - `POST /analyze` - Complete text analysis with translation and corrections
-- `POST /translate` - Translate text to Bengali
+- `POST /translate` - Translate text to Bangla
 - `POST /detect-language` - Detect source language
 - `POST /grammar/check` - Check grammar
 - `POST /spelling/check` - Check spelling
@@ -194,7 +194,7 @@ Environment variables to set:
 ### Test Frontend
 1. Open http://localhost:3000
 2. Type English text in the editor
-3. Click "Translate to Bengali"
+3. Click "Translate to Bangla"
 4. See inline corrections and AI assistant suggestions
 
 ### Test Backend API
@@ -204,7 +204,7 @@ Environment variables to set:
 
 ### Test Account
 ```
-Email: test@gobengali.com
+Email: test@gobangla.com
 Password: testpassword
 ```
 
@@ -264,16 +264,16 @@ This project is licensed under the MIT License.
 
 - Meta AI for NLLB-200 translation model
 - AI4Bharat for IndicBERT
-- Bengali language community
+- Bangla language community
 
 ## 📞 Support
 
-For support, email support@gobengali.com or open an issue.
+For support, email support@gobangla.com or open an issue.
 
 ## 🗺️ Roadmap
 
 - [ ] Speech-to-text integration (Whisper)
-- [ ] Bengali-to-English reverse translation
+- [ ] Bangla-to-English reverse translation
 - [ ] Mobile app (React Native)
 - [ ] Chrome extension
 - [ ] Custom dictionary support
@@ -282,7 +282,7 @@ For support, email support@gobengali.com or open an issue.
 
 ---
 
-**Built with ❤️ for the Bengali community**
+**Built with ❤️ for the Bangla community**
 
 **Version**: 1.0.0  
 **Status**: Production Ready

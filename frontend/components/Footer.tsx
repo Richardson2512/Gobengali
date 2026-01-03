@@ -11,7 +11,7 @@ export function Footer() {
               <img src="/logo.png" alt="GoBengali Logo" className="h-8 w-auto" />
               <span className="text-xl font-bold text-gray-900">GoBengali</span>
             </Link>
-            <p className="text-gray-600 text-sm">Empowering Bengali Writers with AI-powered tools</p>
+            <p className="text-gray-600 text-sm">Empowering Bangla Writers with AI-powered tools</p>
           </div>
           <div>
             <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
@@ -40,7 +40,7 @@ export function Footer() {
         </div>
         <div className="border-t border-gray-200 pt-8 text-center text-gray-600">
           <p className="mb-2">© 2025 GoBengali. All rights reserved.</p>
-          <p className="text-sm">Built with ❤️ for the Bengali community</p>
+          <p className="text-sm">Built with ❤️ for the Bangla community</p>
         </div>
       </div>
     </footer>

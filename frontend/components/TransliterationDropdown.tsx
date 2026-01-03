@@ -21,19 +21,19 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
         console.log('Word too short, not fetching');
         return;
       }
-      
+
       console.log('📝 Fetching transliteration for:', word);
       setLoading(true);
-      
+
       try {
         // Always use API for transliteration - no hardcoded data!
-        const result = await transliterate({ 
-          text: word, 
+        const result = await transliterate({
+          text: word,
           max_suggestions: 4,
-          // Include reverse transliteration flag for Bengali words
+          // Include reverse transliteration flag for Bangla words
           reverse: /[\u0980-\u09FF]/.test(word)
         });
-        
+
         console.log('✅ Got suggestions:', result.suggestions);
         setSuggestions(result.suggestions);
       } catch (error) {
@@ -73,16 +73,16 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [suggestions, selectedIndex, onSelect, onClose]);
 
-  console.log('🎨 TransliterationDropdown render:', { 
-    word, 
-    loading, 
+  console.log('🎨 TransliterationDropdown render:', {
+    word,
+    loading,
     suggestionsCount: suggestions.length,
-    position 
+    position
   });
 
   if (loading) {
     return (
-      <div 
+      <div
         className="fixed z-50 bg-white border border-gray-300 rounded-lg shadow-xl px-4 py-3"
         style={{ top: `${position.top}px`, left: `${position.left}px` }}
       >
@@ -99,24 +99,23 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
   console.log('✅ Rendering dropdown with', suggestions.length, 'suggestions');
 
   return (
-    <div 
+    <div
       className="fixed z-50 bg-white border-2 border-green-500 rounded-lg shadow-2xl min-w-[220px] overflow-hidden"
-      style={{ 
-        top: `${position.top}px`, 
-        left: `${position.left}px` 
+      style={{
+        top: `${position.top}px`,
+        left: `${position.left}px`
       }}
     >
       <div className="bg-green-50 px-3 py-1 border-b border-green-200">
-        <p className="text-xs font-semibold text-green-800">Bengali Suggestions</p>
+        <p className="text-xs font-semibold text-green-800">Bangla Suggestions</p>
       </div>
       {suggestions.map((suggestion, index) => (
         <div
           key={index}
-          className={`px-4 py-3 cursor-pointer transition-colors bengali-text text-lg border-b border-gray-100 last:border-b-0 ${
-            index === selectedIndex 
-              ? 'bg-green-100 text-green-900 font-semibold' 
+          className={`px-4 py-3 cursor-pointer transition-colors bengali-text text-lg border-b border-gray-100 last:border-b-0 ${index === selectedIndex
+              ? 'bg-green-100 text-green-900 font-semibold'
               : 'hover:bg-gray-50 text-gray-900'
-          }`}
+            }`}
           onClick={() => onSelect(suggestion.text)}
         >
           <span className="text-gray-400 text-sm mr-3 font-mono">{index + 1}.</span>

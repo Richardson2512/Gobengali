@@ -39,12 +39,12 @@ export default function Editor() {
 
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
   const [selectedError, setSelectedError] = useState<string | null>(null);
-  
+
   // Transliteration state
   const [showTransliteration, setShowTransliteration] = useState(false);
   const [currentWord, setCurrentWord] = useState('');
   const [translitDropdownPos, setTranslitDropdownPos] = useState({ top: 0, left: 0 });
-  
+
   // Flag to prevent auto-check immediately after applying suggestions
   const [skipNextAutoCheck, setSkipNextAutoCheck] = useState(false);
 
@@ -74,25 +74,25 @@ export default function Editor() {
     onUpdate: ({ editor }) => {
       const text = editor.getText().trim();
       const newWordCount = countWords(text);
-      
+
       // Check word limit (free tier only)
       const { wordLimitReached } = checkDailyLimits();
-      
+
       if (wordLimitReached && newWordCount > currentWordCount) {
         // Prevent adding more words
         alert('⚠️ Daily limit reached!\n\nYou have written 500 words today.\nUpgrade to Pro for unlimited access or come back tomorrow!');
         return; // Don't update content
       }
-      
+
       setContent(text);
-      
+
       // Update stats
       if (text.length > 0) {
         updateStats(newWordCount, countCharacters(text));
       } else {
         updateStats(0, 0);
       }
-      
+
       // Check for word typing (for transliteration) - works for both typing and editing
       checkForEnglishWord(editor);
     },
@@ -136,7 +136,7 @@ export default function Editor() {
 
       // Check if text contains Bengali characters
       const hasBengali = /[\u0980-\u09FF]/.test(text);
-      
+
       if (!hasBengali) {
         // Clear errors if no Bengali text
         if (errors.length > 0) {
@@ -147,9 +147,9 @@ export default function Editor() {
 
       try {
         setIsAnalyzing(true);
-        
-        console.log('🔍 Checking Bengali text:', text);
-        
+
+        console.log('🔍 Checking Bangla text:', text);
+
         // Call analyze endpoint for Bengali text
         const result = await analyzeText({
           text: text,
@@ -201,20 +201,20 @@ export default function Editor() {
   // ONLY sync editor when suggestions are applied (not during user typing)
   useEffect(() => {
     if (!editor || !shouldSyncToEditor) return;
-    
+
     console.log('🔄 Syncing editor with applied suggestion');
     console.log('New content:', content);
-    
+
     // Set flag to skip auto-check
     setSkipNextAutoCheck(true);
-    
+
     // Update editor with the corrected content
     editor.commands.setContent(content, false);
     editor.commands.focus('end');
-    
+
     // Reset the sync flag immediately
     setShouldSyncToEditor(false);
-    
+
     // Reset skip flag after delay
     setTimeout(() => {
       setSkipNextAutoCheck(false);
@@ -226,7 +226,7 @@ export default function Editor() {
     if (skipNextAutoCheck) {
       return;
     }
-    
+
     if (content && content.trim().length > 0) {
       detectLanguageAuto(content);
       autoCheckBengali(content);  // Auto-check Bengali text
@@ -241,27 +241,27 @@ export default function Editor() {
   // Check for current word and show transliteration dropdown
   const checkForEnglishWord = useCallback((editor: any) => {
     if (!editor) return;
-    
+
     const { state, view } = editor;
     const { from } = state.selection;
-    
+
     // Get text before cursor (more context for better word detection)
     const textBefore = state.doc.textBetween(Math.max(0, from - 50), from, ' ');
     const textAfter = state.doc.textBetween(from, Math.min(state.doc.content.size, from + 10), ' ');
-    
+
     // Split and get the current word being typed/edited
     const wordsBefore = textBefore.split(/\s+/);
     const lastWord = wordsBefore[wordsBefore.length - 1];
-    
+
     console.log('🔍 Checking word:', lastWord, 'Length:', lastWord?.length);
-    
+
     // Check if it's an English word (letters only, 2+ chars)
     const isEnglishWord = lastWord && /^[a-zA-Z]{2,}$/.test(lastWord);
     const isMixedWord = lastWord && /[a-zA-Z]/.test(lastWord) && lastWord.length >= 2;
     const isBengaliWord = lastWord && /[\u0980-\u09FF]+/.test(lastWord) && lastWord.length >= 1;
-    
+
     console.log('Word types:', { isEnglishWord, isMixedWord, isBengaliWord });
-    
+
     // Show dropdown for:
     // 1. Pure English words (typing)
     // 2. Mixed words (editing)
@@ -270,25 +270,25 @@ export default function Editor() {
       console.log('✅ Should show dropdown for:', lastWord);
       // Get word start position
       const wordStart = from - lastWord.length;
-      
+
       try {
         // Get DOM coordinates (viewport-relative)
         const startCoords = view.coordsAtPos(wordStart);
         const endCoords = view.coordsAtPos(from);
-        
+
         // Position dropdown below cursor
-        setTranslitDropdownPos({ 
+        setTranslitDropdownPos({
           top: endCoords.bottom + 5,
           left: startCoords.left
         });
-        
+
         console.log('📍 Dropdown position:', { top: endCoords.bottom + 5, left: startCoords.left });
-        
+
         // For Bengali words, extract the English equivalent attempt or show suggestions
         const wordToTransliterate = isEnglishWord ? lastWord : lastWord;
         setCurrentWord(wordToTransliterate);
         setShowTransliteration(true);
-        
+
         console.log('✅ Dropdown should be visible now for word:', wordToTransliterate);
       } catch (error) {
         console.error('Error positioning dropdown:', error);
@@ -305,20 +305,20 @@ export default function Editor() {
 
     const { state } = editor;
     const { from } = state.selection;
-    
+
     // Find the start of the current English word
     const textBefore = state.doc.textBetween(Math.max(0, from - 50), from, ' ');
     const words = textBefore.split(/\s+/);
     const lastWord = words[words.length - 1];
     const wordStart = from - lastWord.length;
-    
+
     // Replace English word with Bengali suggestion
     editor.chain()
       .focus()
       .deleteRange({ from: wordStart, to: from })
       .insertContent(suggestion + ' ')
       .run();
-    
+
     setShowTransliteration(false);
     setCurrentWord('');
   }, [editor]);
@@ -377,7 +377,7 @@ export default function Editor() {
     if (!editor) return;
 
     let htmlContent = text;
-    
+
     // Sort errors by offset in descending order to avoid position shifts
     const sortedErrors = [...errors].sort((a, b) => b.offset - a.offset);
 
@@ -395,7 +395,7 @@ export default function Editor() {
 
   const handleAnalyzeOnly = async () => {
     if (!translatedContent || translatedContent.trim().length === 0) {
-      alert('Please translate text first or enter Bengali text');
+      alert('Please translate text first or enter Bangla text');
       return;
     }
 
@@ -553,11 +553,11 @@ export default function Editor() {
       {/* Editor Content */}
       <div className="relative">
         <EditorContent editor={editor} />
-        
+
         {!content && !translatedContent && (
           <div className="absolute top-6 left-6 text-gray-400 pointer-events-none">
             <p className="text-lg">Start typing in English...</p>
-            <p className="text-sm mt-2">Type English words and get Bengali suggestions instantly</p>
+            <p className="text-sm mt-2">Type English words and get Bangla suggestions instantly</p>
           </div>
         )}
       </div>

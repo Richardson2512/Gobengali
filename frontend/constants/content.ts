@@ -1,10 +1,10 @@
 export const LANDING_CONTENT = {
     hero: {
         bengaliTitle: "আপনার বাংলা লেখার সঙ্গী",
-        englishTitle: "Your Bengali Writing Partner",
+        englishTitle: "Your Bangla Writing Assistant",
         subtitle: "Your AI Writing Partner for",
-        subtitleHighlight: "Bengali that Excels",
-        description: "Get instant, context-aware suggestions for grammar, spelling, and style, so you never have to second-guess your writing again."
+        subtitleHighlight: "Bangla that Excels",
+        description: "Get instant, context-aware suggestions using our advanced Bangla grammar checker and translator, so you never have to second-guess your writing again."
     },
     features: [
         { text: "AI-Powered Translation" },
@@ -13,7 +13,7 @@ export const LANDING_CONTENT = {
     ],
     sections: {
         grammar: {
-            title: "Correct Bengali grammar mistakes in seconds",
+            title: "Correct Bangla grammar mistakes in seconds",
             description: "Don't worry about tricky rules. GoBengali's AI instantly detects and fixes the most complex errors, so your writing is always clear and professional."
         },
         spelling: {

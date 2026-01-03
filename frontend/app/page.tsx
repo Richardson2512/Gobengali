@@ -62,25 +62,23 @@ export default function Home() {
           <p className="text-lg text-gray-600 max-w-4xl mx-auto mb-8">
             {LANDING_CONTENT.hero.description}
           </p>
-          <div className="flex items-center justify-center gap-8 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>AI-Powered Translation</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Grammar Correction</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Spelling Checker</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            <span>Bangla Translator</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            <span>Bangla Grammar Checker</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            <span>Bangla Writing Assistant</span>
           </div>
         </div>
       </section>
@@ -111,7 +109,7 @@ export default function Home() {
             {/* Left: Description */}
             <div>
               <p className="text-green-600 font-semibold mb-3">AI Grammar Engine</p>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">Correct Bengali grammar mistakes in seconds</h2>
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">Correct Bangla grammar mistakes in seconds</h2>
               <p className="text-lg text-gray-600 mb-8">
                 Don't worry about tricky rules. GoBengali's AI instantly detects and fixes the most complex errors,
                 so your writing is always clear and professional.
@@ -197,8 +195,8 @@ export default function Home() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Trusted by Bengali writers worldwide</h2>
-            <p className="text-xl text-gray-600">Join thousands who write with confidence using AI-powered Bengali language intelligence</p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Trusted by Bangla writers worldwide</h2>
+            <p className="text-xl text-gray-600">Join thousands who write with confidence using AI-powered Bangla language intelligence</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {/* Card 1 */}
@@ -208,9 +206,9 @@ export default function Home() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               </div>
-              <h3 className="font-bold text-lg text-gray-900 mb-2">Bengali-First AI</h3>
+              <h3 className="font-bold text-lg text-gray-900 mb-2">Bangla-First AI</h3>
               <p className="text-gray-600">
-                Built from the ground up for Bengali, our AI is trained on the unique nuances of the language.
+                Built from the ground up for Bangla, our AI is trained on the unique nuances of the language.
               </p>
             </div>
 
@@ -236,7 +234,7 @@ export default function Home() {
               </div>
               <h3 className="font-bold text-lg text-gray-900 mb-2">Smart Typing</h3>
               <p className="text-gray-600">
-                Instantly convert English characters into perfect Bengali script as you type.
+                Instantly convert English characters into perfect Bangla script as you type.
               </p>
             </div>
 
@@ -313,7 +311,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Understands Your Dialect</h3>
-                    <p className="text-gray-600">Trained on Bengali from across the globe, our AI recognizes regional spelling variations.</p>
+                    <p className="text-gray-600">Trained on Bangla from across the globe, our AI recognizes regional spelling variations.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -342,7 +340,7 @@ export default function Home() {
               <p className="text-green-600 font-semibold mb-3">Learn as you write</p>
               <h2 className="text-4xl font-bold text-gray-900 mb-6">Learn the "why" behind the fix</h2>
               <p className="text-lg text-gray-600 mb-8">
-                Every correction comes with an explanation of why your original text was wrong. Learn Bengali grammar naturally as you write.
+                Every correction comes with an explanation of why your original text was wrong. Learn Bangla grammar naturally as you write.
               </p>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -375,7 +373,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Progressive learning</h3>
-                    <p className="text-gray-600">Absorb the patterns of perfect Bengali just by writing, and watch your own skills grow over time.</p>
+                    <p className="text-gray-600">Absorb the patterns of perfect Bangla just by writing, and watch your own skills grow over time.</p>
                   </div>
                 </div>
               </div>
@@ -511,13 +509,13 @@ export default function Home() {
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Everything you need to know</h2>
-            <p className="text-xl text-gray-600">Common questions about GoBengali's AI-powered Bengali writing assistant</p>
+            <p className="text-xl text-gray-600">Common questions about GoBengali's AI-powered Bangla writing assistant</p>
           </div>
 
           <div className="space-y-4">
             <FAQItem
               question="What exactly is GoBengali Pro?"
-              answer="GoBengali Pro is your personal AI writing expert. It not only corrects grammar and spelling but also helps you refine your style, find the perfect tone, and rewrite sentences for better impact. It's for anyone who wants their Bengali writing to be clear, confident, and professional."
+              answer="GoBengali Pro is your personal AI writing expert. It not only corrects grammar and spelling but also helps you refine your style, find the perfect tone, and rewrite sentences for better impact. It's for anyone who wants their Bangla writing to be clear, confident, and professional."
             />
             <FAQItem
               question="Can I try Pro features before I buy?"
@@ -529,11 +527,11 @@ export default function Home() {
             />
             <FAQItem
               question="Can I use GoBengali for professional work?"
-              answer="Absolutely! GoBengali is ideal for business communications, academic writing, creative content, and more. Many professionals use it to ensure the quality of their Bengali writing."
+              answer="Absolutely! GoBengali is ideal for business communications, academic writing, creative content, and more. Many professionals use it to ensure the quality of their Bangla writing."
             />
             <FAQItem
-              question="How accurate is GoBengali's Bengali spelling checker?"
-              answer="Our AI is trained on thousands of Bengali texts and achieves over 95% accuracy. It can catch everything from simple typos to complex contextual errors, and we're constantly improving it."
+              question="How accurate is GoBengali's Bangla spelling checker?"
+              answer="Our AI is trained on thousands of Bangla texts and achieves over 95% accuracy. It can catch everything from simple typos to complex contextual errors, and we're constantly improving it."
             />
           </div>
         </div>
@@ -542,8 +540,8 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-16 bg-gradient-to-r from-green-600 to-emerald-600">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-white mb-4">Improve Your Bengali Writing Today</h2>
-          <p className="text-xl text-green-100 mb-8">Join thousands of Bengali writers who trust GoBengali</p>
+          <h2 className="text-4xl font-bold text-white mb-4">Improve Your Bangla Writing Today</h2>
+          <p className="text-xl text-green-100 mb-8">Join thousands of Bangla writers who trust GoBengali</p>
           <div className="flex gap-4 justify-center flex-wrap">
             <button className="bg-white text-green-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-50 transition-colors shadow-lg">
               Start Free
