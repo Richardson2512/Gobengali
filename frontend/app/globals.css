@@ -168,6 +168,13 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Scroll freeze via CSS class (not inline body manipulation) */
+body.scroll-frozen {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

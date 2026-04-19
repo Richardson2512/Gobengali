@@ -2,25 +2,12 @@ import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
-// Log the API URL being used
-console.log('🔗 API Configuration:', {
-  API_URL,
-  ENV_VAR: process.env.NEXT_PUBLIC_API_URL,
-  FINAL_URL: API_URL
-});
-
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
   timeout: 30000, // 30 seconds for ML model processing
-});
-
-// Log each request
-apiClient.interceptors.request.use(request => {
-  console.log('📤 API Request:', request.method?.toUpperCase(), request.baseURL + request.url);
-  return request;
 });
 
 export interface AnalyzeRequest {
@@ -129,11 +116,9 @@ export const transliterate = async (request: TransliterateRequest): Promise<Tran
   return response.data;
 };
 
-// Health check
 export const healthCheck = async () => {
   const response = await apiClient.get('/health');
   return response.data;
 };
 
 export default apiClient;
-

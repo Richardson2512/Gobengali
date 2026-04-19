@@ -5,13 +5,44 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Highlight from '@tiptap/extension-highlight';
 import { useEditorStore } from '@/store/editorStore';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { analyzeText, detectLanguage as detectLang } from '@/lib/api';
-import { countWords, countCharacters, generateId, debounce } from '@/lib/utils';
+import { countWords, countCharacters, generateId } from '@/lib/utils';
 import { X } from 'lucide-react';
 import { SuggestionDropdown } from './SuggestionDropdown';
 import { TransliterationDropdown } from './TransliterationDropdown';
 import { SimpleEditorToolbar } from './SimpleEditorToolbar';
+
+// Stable debounce that doesn't re-create on renders
+function useDebouncedCallback<T extends (...args: any[]) => any>(
+  callback: T,
+  delay: number,
+) {
+  const callbackRef = useRef(callback);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Always keep the latest callback
+  callbackRef.current = callback;
+
+  const debouncedFn = useCallback(
+    (...args: Parameters<T>) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        callbackRef.current(...args);
+      }, delay);
+    },
+    [delay],
+  );
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  return debouncedFn;
+}
 
 export default function Editor() {
   const {
@@ -35,6 +66,7 @@ export default function Editor() {
     setShouldSyncToEditor,
     checkDailyLimits,
     wordCount: currentWordCount,
+    notify,
   } = useEditorStore();
 
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
@@ -47,6 +79,9 @@ export default function Editor() {
 
   // Flag to prevent auto-check immediately after applying suggestions
   const [skipNextAutoCheck, setSkipNextAutoCheck] = useState(false);
+
+  // Track the last content that triggered an auto-check to prevent duplicate checks
+  const lastCheckedContentRef = useRef('');
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -62,236 +97,176 @@ export default function Editor() {
       attributes: {
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
       },
-      handleKeyDown: (view, event) => {
-        // Check for transliteration on any text editing action
+      handleKeyDown: (_view, event) => {
         if (event.key === 'Backspace' || event.key === 'Delete') {
-          // Delay check to allow deletion to process first
           setTimeout(() => checkForEnglishWord(editor), 10);
         }
-        return false; // Let the editor handle the key normally
+        return false;
       },
     },
     onUpdate: ({ editor }) => {
       const text = editor.getText().trim();
       const newWordCount = countWords(text);
 
-      // Check word limit (free tier only)
       const { wordLimitReached } = checkDailyLimits();
 
       if (wordLimitReached && newWordCount > currentWordCount) {
-        // Prevent adding more words
-        alert('⚠️ Daily limit reached!\n\nYou have written 500 words today.\nUpgrade to Pro for unlimited access or come back tomorrow!');
-        return; // Don't update content
+        notify({
+          type: 'warning',
+          title: 'Daily Limit Reached',
+          message: 'You have written 500 words today. Upgrade to Pro for unlimited access or come back tomorrow!',
+          duration: 6000,
+        });
+        return;
       }
 
       setContent(text);
 
-      // Update stats
       if (text.length > 0) {
         updateStats(newWordCount, countCharacters(text));
       } else {
         updateStats(0, 0);
       }
 
-      // Check for word typing (for transliteration) - works for both typing and editing
       checkForEnglishWord(editor);
     },
     onSelectionUpdate: ({ editor }) => {
-      // Also check when cursor moves (clicking into a word)
       checkForEnglishWord(editor);
     },
-    onCreate: ({ editor }) => {
-      // Ensure editor starts completely empty
+    onCreate: () => {
       setContent('');
       setErrors([]);
       updateStats(0, 0);
     },
   });
 
-  // Detect language automatically
-  const detectLanguageAuto = useCallback(
-    debounce(async (text: string) => {
-      if (!text || text.length < 10) return;
+  // Debounced language detection
+  const detectLanguageAuto = useDebouncedCallback(async (text: string) => {
+    if (!text || text.length < 10) return;
+    try {
+      const result = await detectLang({ text });
+      setSourceLanguage(result.language);
+    } catch {
+      // Language detection is best-effort; silently ignore failures
+    }
+  }, 1000);
 
-      try {
-        const result = await detectLang({ text });
-        setSourceLanguage(result.language);
-      } catch (error) {
-        console.error('Language detection failed:', error);
-      }
-    }, 1000),
-    []
-  );
+  // Debounced auto-check for Bengali text
+  const autoCheckBengali = useDebouncedCallback(async (text: string) => {
+    if (!text || text.trim().length < 5) {
+      if (errors.length > 0) setErrors([]);
+      return;
+    }
 
-  // Auto-check grammar and spelling for Bengali text
-  const autoCheckBengali = useCallback(
-    debounce(async (text: string) => {
-      // Clear errors if no text or text is too short
-      if (!text || text.trim().length < 5) {
-        if (errors.length > 0) {
-          setErrors([]);
+    const hasBengali = /[\u0980-\u09FF]/.test(text);
+    if (!hasBengali) {
+      if (errors.length > 0) setErrors([]);
+      return;
+    }
+
+    // Don't re-check the same content
+    if (text === lastCheckedContentRef.current) return;
+    lastCheckedContentRef.current = text;
+
+    try {
+      setIsAnalyzing(true);
+
+      const result = await analyzeText({
+        text,
+        lang: 'bn',
+        checkGrammar: true,
+        checkSpelling: true,
+      });
+
+      if (result.errors && result.errors.length > 0) {
+        const formattedErrors = result.errors.map((err) => ({
+          id: generateId(),
+          type: err.type,
+          offset: err.offset,
+          length: err.length,
+          originalText: err.original_text,
+          suggestions: err.suggestions,
+          message: err.message,
+          reason: err.reason,
+          confidence: err.confidence,
+        }));
+
+        setErrors(formattedErrors);
+
+        if (editor && formattedErrors.length > 0) {
+          applyErrorHighlights(text, formattedErrors);
         }
-        return;
-      }
-
-      // Check if text contains Bengali characters
-      const hasBengali = /[\u0980-\u09FF]/.test(text);
-
-      if (!hasBengali) {
-        // Clear errors if no Bengali text
-        if (errors.length > 0) {
-          setErrors([]);
-        }
-        return;
-      }
-
-      try {
-        setIsAnalyzing(true);
-
-        console.log('🔍 Checking Bangla text:', text);
-
-        // Call analyze endpoint for Bengali text
-        const result = await analyzeText({
-          text: text,
-          lang: 'bn',
-          checkGrammar: true,
-          checkSpelling: true,
-        });
-
-        console.log('✅ Analysis result:', result.errors.length, 'errors found');
-
-        // Only set errors if there are actual errors detected
-        if (result.errors && result.errors.length > 0) {
-          // Convert errors to store format
-          const formattedErrors = result.errors.map((err) => ({
-            id: generateId(),
-            type: err.type,
-            offset: err.offset,
-            length: err.length,
-            originalText: err.original_text,
-            suggestions: err.suggestions,
-            message: err.message,
-            reason: err.reason,
-            confidence: err.confidence,
-          }));
-
-          console.log('📝 Setting errors in store:', formattedErrors);
-          setErrors(formattedErrors);
-
-          // Apply error highlights
-          if (editor && formattedErrors.length > 0) {
-            applyErrorHighlights(text, formattedErrors);
-          }
-        } else {
-          // Clear errors if API returns no errors
-          console.log('✨ No errors found, clearing');
-          setErrors([]);
-        }
-      } catch (error: any) {
-        console.error('❌ Auto-check failed:', error);
-        // Clear errors on error to avoid showing stale data
+      } else {
         setErrors([]);
-      } finally {
-        setIsAnalyzing(false);
       }
-    }, 1500),  // Check after 1.5 seconds of no typing (faster response)
-    [editor, errors.length]
-  );
+    } catch {
+      setErrors([]);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, 1500);
 
   // ONLY sync editor when suggestions are applied (not during user typing)
   useEffect(() => {
     if (!editor || !shouldSyncToEditor) return;
 
-    console.log('🔄 Syncing editor with applied suggestion');
-    console.log('New content:', content);
-
-    // Set flag to skip auto-check
     setSkipNextAutoCheck(true);
 
-    // Update editor with the corrected content
     editor.commands.setContent(content, false);
     editor.commands.focus('end');
 
-    // Reset the sync flag immediately
     setShouldSyncToEditor(false);
 
-    // Reset skip flag after delay
     setTimeout(() => {
       setSkipNextAutoCheck(false);
     }, 3000);
   }, [shouldSyncToEditor, editor, content, setShouldSyncToEditor]);
 
+  // Trigger auto-check when content changes
   useEffect(() => {
-    // Skip auto-check if suggestions were just applied
-    if (skipNextAutoCheck) {
-      return;
-    }
+    if (skipNextAutoCheck) return;
 
     if (content && content.trim().length > 0) {
       detectLanguageAuto(content);
-      autoCheckBengali(content);  // Auto-check Bengali text
-    } else {
-      // Clear errors when editor is empty
-      if (errors.length > 0) {
-        setErrors([]);
-      }
+      autoCheckBengali(content);
+    } else if (errors.length > 0) {
+      setErrors([]);
     }
-  }, [content, errors.length, skipNextAutoCheck]);
+    // Only depend on content and the skip flag — not errors.length
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content, skipNextAutoCheck]);
 
   // Check for current word and show transliteration dropdown
-  const checkForEnglishWord = useCallback((editor: any) => {
-    if (!editor) return;
+  const checkForEnglishWord = useCallback((editorInstance: any) => {
+    if (!editorInstance) return;
 
-    const { state, view } = editor;
+    const { state, view } = editorInstance;
     const { from } = state.selection;
 
-    // Get text before cursor (more context for better word detection)
     const textBefore = state.doc.textBetween(Math.max(0, from - 50), from, ' ');
-    const textAfter = state.doc.textBetween(from, Math.min(state.doc.content.size, from + 10), ' ');
 
-    // Split and get the current word being typed/edited
     const wordsBefore = textBefore.split(/\s+/);
     const lastWord = wordsBefore[wordsBefore.length - 1];
 
-    console.log('🔍 Checking word:', lastWord, 'Length:', lastWord?.length);
-
-    // Check if it's an English word (letters only, 2+ chars)
     const isEnglishWord = lastWord && /^[a-zA-Z]{2,}$/.test(lastWord);
     const isMixedWord = lastWord && /[a-zA-Z]/.test(lastWord) && lastWord.length >= 2;
     const isBengaliWord = lastWord && /[\u0980-\u09FF]+/.test(lastWord) && lastWord.length >= 1;
 
-    console.log('Word types:', { isEnglishWord, isMixedWord, isBengaliWord });
-
-    // Show dropdown for:
-    // 1. Pure English words (typing)
-    // 2. Mixed words (editing)
-    // 3. Bengali words (when backspacing to allow re-selection)
     if (isEnglishWord || isMixedWord || isBengaliWord) {
-      console.log('✅ Should show dropdown for:', lastWord);
-      // Get word start position
       const wordStart = from - lastWord.length;
 
       try {
-        // Get DOM coordinates (viewport-relative)
         const startCoords = view.coordsAtPos(wordStart);
         const endCoords = view.coordsAtPos(from);
 
-        // Position dropdown below cursor
         setTranslitDropdownPos({
           top: endCoords.bottom + 5,
-          left: startCoords.left
+          left: startCoords.left,
         });
 
-        console.log('📍 Dropdown position:', { top: endCoords.bottom + 5, left: startCoords.left });
-
-        // For Bengali words, extract the English equivalent attempt or show suggestions
-        const wordToTransliterate = isEnglishWord ? lastWord : lastWord;
-        setCurrentWord(wordToTransliterate);
+        setCurrentWord(lastWord);
         setShowTransliteration(true);
-
-        console.log('✅ Dropdown should be visible now for word:', wordToTransliterate);
-      } catch (error) {
-        console.error('Error positioning dropdown:', error);
+      } catch {
         setShowTransliteration(false);
       }
     } else {
@@ -300,32 +275,37 @@ export default function Editor() {
   }, []);
 
   // Handle selecting a Bengali suggestion
-  const handleSelectSuggestion = useCallback((suggestion: string) => {
-    if (!editor) return;
+  const handleSelectSuggestion = useCallback(
+    (suggestion: string) => {
+      if (!editor) return;
 
-    const { state } = editor;
-    const { from } = state.selection;
+      const { state } = editor;
+      const { from } = state.selection;
 
-    // Find the start of the current English word
-    const textBefore = state.doc.textBetween(Math.max(0, from - 50), from, ' ');
-    const words = textBefore.split(/\s+/);
-    const lastWord = words[words.length - 1];
-    const wordStart = from - lastWord.length;
+      const textBefore = state.doc.textBetween(Math.max(0, from - 50), from, ' ');
+      const words = textBefore.split(/\s+/);
+      const lastWord = words[words.length - 1];
+      const wordStart = from - lastWord.length;
 
-    // Replace English word with Bengali suggestion
-    editor.chain()
-      .focus()
-      .deleteRange({ from: wordStart, to: from })
-      .insertContent(suggestion + ' ')
-      .run();
+      editor
+        .chain()
+        .focus()
+        .deleteRange({ from: wordStart, to: from })
+        .insertContent(suggestion + ' ')
+        .run();
 
-    setShowTransliteration(false);
-    setCurrentWord('');
-  }, [editor]);
+      setShowTransliteration(false);
+      setCurrentWord('');
+    },
+    [editor],
+  );
 
   const handleTranslate = async () => {
     if (!content || content.trim().length === 0) {
-      alert('Please enter some text to translate');
+      notify({
+        type: 'info',
+        message: 'Please enter some text to translate.',
+      });
       return;
     }
 
@@ -333,17 +313,14 @@ export default function Editor() {
     setIsAnalyzing(true);
 
     try {
-      // Call analyze endpoint which does translation + corrections
       const result = await analyzeText({
         text: content,
         checkGrammar: true,
         checkSpelling: true,
       });
 
-      // Update translated content
       setTranslatedContent(result.translated_text);
 
-      // Convert errors to store format
       const formattedErrors = result.errors.map((err) => ({
         id: generateId(),
         type: err.type,
@@ -358,28 +335,28 @@ export default function Editor() {
 
       setErrors(formattedErrors);
 
-      // Update editor content with translated text
       if (editor) {
         editor.commands.setContent(result.translated_text);
-        // Apply error highlights
         applyErrorHighlights(result.translated_text, formattedErrors);
       }
     } catch (error: any) {
-      console.error('Translation failed:', error);
-      alert(`Translation failed: ${error.message || 'Unknown error'}`);
+      notify({
+        type: 'error',
+        title: 'Translation Failed',
+        message: error.message || 'An unexpected error occurred.',
+      });
     } finally {
       setIsTranslating(false);
       setIsAnalyzing(false);
     }
   };
 
-  const applyErrorHighlights = (text: string, errors: any[]) => {
+  const applyErrorHighlights = (text: string, errorList: any[]) => {
     if (!editor) return;
 
     let htmlContent = text;
 
-    // Sort errors by offset in descending order to avoid position shifts
-    const sortedErrors = [...errors].sort((a, b) => b.offset - a.offset);
+    const sortedErrors = [...errorList].sort((a, b) => b.offset - a.offset);
 
     sortedErrors.forEach((error) => {
       const before = htmlContent.substring(0, error.offset);
@@ -395,7 +372,10 @@ export default function Editor() {
 
   const handleAnalyzeOnly = async () => {
     if (!translatedContent || translatedContent.trim().length === 0) {
-      alert('Please translate text first or enter Bangla text');
+      notify({
+        type: 'info',
+        message: 'Please translate text first or enter Bangla text.',
+      });
       return;
     }
 
@@ -427,62 +407,49 @@ export default function Editor() {
         applyErrorHighlights(translatedContent, formattedErrors);
       }
     } catch (error: any) {
-      console.error('Analysis failed:', error);
-      alert(`Analysis failed: ${error.message || 'Unknown error'}`);
+      notify({
+        type: 'error',
+        title: 'Analysis Failed',
+        message: error.message || 'An unexpected error occurred.',
+      });
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  // Auto-scroll to editor and freeze page scroll when editor is active
+  // Scroll freeze via CSS class (Fix #17)
   useEffect(() => {
     if (isFrozen) {
-      // First, scroll to editor workspace smoothly
       const workspace = document.getElementById('editor-workspace');
       if (workspace) {
-        const headerOffset = 80; // Account for any fixed headers
+        const headerOffset = 80;
         const elementPosition = workspace.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
+        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
 
-        // Wait for scroll to complete before freezing
         setTimeout(() => {
-          const scrollY = window.scrollY;
-          document.body.style.position = 'fixed';
-          document.body.style.top = `-${scrollY}px`;
-          document.body.style.width = '100%';
-          document.body.style.overflow = 'hidden';
-        }, 500); // 500ms for smooth scroll animation
+          document.body.dataset.scrollY = String(window.scrollY);
+          document.body.style.top = `-${window.scrollY}px`;
+          document.body.classList.add('scroll-frozen');
+        }, 500);
       } else {
-        // If workspace not found, freeze immediately
-        const scrollY = window.scrollY;
-        document.body.style.position = 'fixed';
-        document.body.style.top = `-${scrollY}px`;
-        document.body.style.width = '100%';
-        document.body.style.overflow = 'hidden';
+        document.body.dataset.scrollY = String(window.scrollY);
+        document.body.style.top = `-${window.scrollY}px`;
+        document.body.classList.add('scroll-frozen');
       }
     } else {
-      // Restore scroll position
-      const scrollY = document.body.style.top;
-      document.body.style.position = '';
+      const scrollY = document.body.dataset.scrollY || '0';
+      document.body.classList.remove('scroll-frozen');
       document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
+      delete document.body.dataset.scrollY;
+      window.scrollTo(0, parseInt(scrollY, 10));
     }
 
     return () => {
-      // Cleanup on unmount
-      document.body.style.position = '';
+      document.body.classList.remove('scroll-frozen');
       document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
+      delete document.body.dataset.scrollY;
     };
   }, [isFrozen]);
 
@@ -564,15 +531,12 @@ export default function Editor() {
 
       {/* Transliteration Dropdown */}
       {showTransliteration && currentWord && (
-        <>
-          {console.log('🎯 Rendering TransliterationDropdown:', { currentWord, position: translitDropdownPos, showTransliteration })}
-          <TransliterationDropdown
-            position={translitDropdownPos}
-            word={currentWord}
-            onSelect={handleSelectSuggestion}
-            onClose={() => setShowTransliteration(false)}
-          />
-        </>
+        <TransliterationDropdown
+          position={translitDropdownPos}
+          word={currentWord}
+          onSelect={handleSelectSuggestion}
+          onClose={() => setShowTransliteration(false)}
+        />
       )}
 
       {/* Error Suggestion Dropdown */}
@@ -590,4 +554,3 @@ export default function Editor() {
     </div>
   );
 }
-

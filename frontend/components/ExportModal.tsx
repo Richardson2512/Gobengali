@@ -6,14 +6,13 @@ import { X, FileText, FileDown, FileType } from "lucide-react";
 import { saveAs } from "file-saver";
 import { Document, Paragraph, Packer, TextRun } from "docx";
 import jsPDF from "jspdf";
-import { sanitizeFileName } from "@/lib/utils";
 
 interface ExportModalProps {
   onClose: () => void;
 }
 
 export function ExportModal({ onClose }: ExportModalProps) {
-  const { content } = useEditorStore();
+  const { content, notify } = useEditorStore();
 
   // Detect if content has Bengali
   const hasBengali = /[\u0980-\u09FF]/.test(content);
@@ -50,7 +49,7 @@ export function ExportModal({ onClose }: ExportModalProps) {
       onClose();
     } catch (error) {
       console.error("DOCX export failed:", error);
-      alert("Failed to export as DOCX. Please try TXT format.");
+      notify({ type: 'error', message: 'Failed to export as DOCX. Please try TXT format.' });
     }
   };
 
@@ -97,7 +96,7 @@ export function ExportModal({ onClose }: ExportModalProps) {
       onClose();
     } catch (error) {
       console.error("PDF export failed:", error);
-      alert("Failed to export as PDF. Please try TXT or DOCX format instead.");
+      notify({ type: 'error', message: 'Failed to export as PDF. Please try TXT or DOCX format instead.' });
     }
   };
 

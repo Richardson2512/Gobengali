@@ -1,29 +1,20 @@
 "use client";
 
 import { useEditorStore } from "@/store/editorStore";
-import { Button } from "./ui/Button";
 import { Check, X, CheckCheck, AlertCircle, CheckCircle2, BookOpen, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 export function AIAssistantPanel() {
-  const { errors, applySuggestion, ignoreError, applyAllSuggestions, setActiveErrorId, activeErrorId, content } = useEditorStore();
-  
-  // Log when errors change for debugging
-  useEffect(() => {
-    if (errors.length > 0) {
-      console.log('AI Assistant: Showing', errors.length, 'suggestions');
-    }
-  }, [errors]);
+  const { errors, applySuggestion, ignoreError, applyAllSuggestions, setActiveErrorId, activeErrorId } = useEditorStore();
 
   const spellingErrors = errors.filter(e => e.type === 'spelling');
   const grammarErrors = errors.filter(e => e.type === 'grammar');
-  
+
   // Scroll detection for "more below" indicator
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
 
-  // Check if there's more content to scroll
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -36,8 +27,7 @@ export function AIAssistantPanel() {
 
     checkScroll();
     container.addEventListener('scroll', checkScroll);
-    
-    // Also check when errors change
+
     const resizeObserver = new ResizeObserver(checkScroll);
     resizeObserver.observe(container);
 
@@ -47,21 +37,13 @@ export function AIAssistantPanel() {
     };
   }, [errors]);
 
-  // Reject all errors
   const rejectAllSuggestions = () => {
-    console.log('Rejecting all suggestions');
     errors.forEach(error => ignoreError(error.id));
-  };
-  
-  // Apply all with logging
-  const handleApplyAll = () => {
-    console.log('Applying all suggestions. Current errors:', errors.length);
-    applyAllSuggestions();
   };
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 relative flex flex-col" style={{ height: '800px' }}>
-      {/* Header - Fixed at top, always visible */}
+      {/* Header */}
       <div className="border-b border-gray-200 p-4 flex-shrink-0 bg-white z-10">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-gray-900">AI Assistant</h2>
@@ -75,7 +57,7 @@ export function AIAssistantPanel() {
         {errors.length > 0 && (
           <div className="flex gap-2">
             <button
-              onClick={handleApplyAll}
+              onClick={() => applyAllSuggestions()}
               className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               <CheckCheck size={16} />
@@ -92,10 +74,10 @@ export function AIAssistantPanel() {
         )}
       </div>
 
-      {/* Corrections List - Scrollable independently */}
-      <div 
+      {/* Corrections List */}
+      <div
         ref={scrollContainerRef}
-        className="p-4 space-y-3 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar" 
+        className="p-4 space-y-3 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar"
         style={{ maxHeight: '650px' }}
       >
         {errors.length === 0 ? (
@@ -106,7 +88,6 @@ export function AIAssistantPanel() {
           </div>
         ) : (
           <>
-            {/* All Corrections */}
             {errors.map((error) => (
               <CorrectionCard
                 key={error.id}
@@ -116,22 +97,22 @@ export function AIAssistantPanel() {
                 onReject={() => ignoreError(error.id)}
                 onHover={() => setActiveErrorId(error.id)}
               />
-          ))}
-        </>
+            ))}
+          </>
+        )}
+      </div>
+
+      {/* Scroll Indicator */}
+      {showScrollIndicator && (
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none flex items-end justify-center pb-2">
+          <div className="bg-green-600 text-white px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 shadow-lg animate-bounce">
+            <ChevronDown size={14} />
+            Scroll for more suggestions
+          </div>
+        </div>
       )}
     </div>
-
-    {/* Scroll Indicator - Shows when there are more suggestions below */}
-    {showScrollIndicator && (
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none flex items-end justify-center pb-2">
-        <div className="bg-green-600 text-white px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 shadow-lg animate-bounce">
-          <ChevronDown size={14} />
-          Scroll for more suggestions
-        </div>
-      </div>
-    )}
-  </div>
-);
+  );
 }
 
 interface CorrectionCardProps {
@@ -143,10 +124,6 @@ interface CorrectionCardProps {
 }
 
 function CorrectionCard({ error, isActive, onAccept, onReject, onHover }: CorrectionCardProps) {
-  const handleAccept = (suggestion: string) => {
-    console.log('Accepting suggestion:', error.originalText, '→', suggestion);
-    onAccept(suggestion);
-  };
   const getTypeInfo = (type: string) => {
     switch (type) {
       case 'spelling':
@@ -188,7 +165,7 @@ function CorrectionCard({ error, isActive, onAccept, onReject, onHover }: Correc
               {error.originalText}
             </span>
           </div>
-          <span className="text-gray-400">→</span>
+          <span className="text-gray-400">&rarr;</span>
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500 font-medium">Suggested:</span>
             <span className="text-lg font-semibold text-green-600 bengali-text px-2 py-1 bg-green-50 rounded border-2 border-green-300">
@@ -203,31 +180,31 @@ function CorrectionCard({ error, isActive, onAccept, onReject, onHover }: Correc
         <div className="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 p-3 rounded-r">
           <p className="text-xs font-semibold text-blue-900 mb-1 flex items-center gap-1">
             <BookOpen size={12} />
-            কারণ:
+            Reason:
           </p>
           <p className="text-sm text-blue-800 bengali-text leading-relaxed">{error.reason}</p>
         </div>
       )}
 
-            {/* Accept/Reject Actions */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleAccept(topSuggestion)}
-                className="flex-1 bg-green-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
-              >
-                <Check size={16} />
-                Accept
-              </button>
-              <button
-                onClick={onReject}
-                className="flex-1 bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-300 transition-colors flex items-center justify-center gap-2"
-              >
-                <X size={16} />
-                Reject
-              </button>
-            </div>
+      {/* Accept/Reject Actions */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => onAccept(topSuggestion)}
+          className="flex-1 bg-green-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
+        >
+          <Check size={16} />
+          Accept
+        </button>
+        <button
+          onClick={onReject}
+          className="flex-1 bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-300 transition-colors flex items-center justify-center gap-2"
+        >
+          <X size={16} />
+          Reject
+        </button>
+      </div>
 
-      {/* Additional Suggestions (if any) */}
+      {/* Additional Suggestions */}
       {error.suggestions && error.suggestions.length > 1 && (
         <div className="mt-3 pt-3 border-t border-gray-200">
           <p className="text-xs text-gray-500 mb-2 font-medium">More suggestions:</p>
@@ -235,7 +212,7 @@ function CorrectionCard({ error, isActive, onAccept, onReject, onHover }: Correc
             {error.suggestions.slice(1, 3).map((suggestion: string, idx: number) => (
               <button
                 key={idx}
-                onClick={() => handleAccept(suggestion)}
+                onClick={() => onAccept(suggestion)}
                 className="px-3 py-1.5 text-sm bg-gray-50 hover:bg-green-50 hover:text-green-700 border border-gray-200 hover:border-green-300 rounded-lg transition-colors bengali-text font-medium"
               >
                 {suggestion}
@@ -247,4 +224,3 @@ function CorrectionCard({ error, isActive, onAccept, onReject, onHover }: Correc
     </div>
   );
 }
-

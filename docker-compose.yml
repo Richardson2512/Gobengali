@@ -8,11 +8,9 @@ services:
       - "8000:8000"
     environment:
       - APP_NAME=GoBengali
-      - DEBUG=True
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY env var is required}
       - CORS_ORIGINS=http://localhost:3000
-      - REDIS_URL=redis://redis:6379/0
-    depends_on:
-      - redis
     volumes:
       - ./backend/models:/app/models
 
@@ -22,11 +20,6 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
     depends_on:
       - backend
-
-  redis:
-    image: "redis:alpine"
-    ports:
-      - "6379:6379"

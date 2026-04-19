@@ -39,7 +39,7 @@ export function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-200 pt-8 text-center text-gray-600">
-          <p className="mb-2">© 2025 GoBengali. All rights reserved.</p>
+          <p className="mb-2">&copy; {new Date().getFullYear()} GoBengali. All rights reserved.</p>
           <p className="text-sm">Built with ❤️ for the Bangla community</p>
         </div>
       </div>

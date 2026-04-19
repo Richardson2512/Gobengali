@@ -17,28 +17,19 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
 
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (word.length < 1) {
-        console.log('Word too short, not fetching');
-        return;
-      }
+      if (word.length < 1) return;
 
-      console.log('📝 Fetching transliteration for:', word);
       setLoading(true);
 
       try {
-        // Always use API for transliteration - no hardcoded data!
         const result = await transliterate({
           text: word,
           max_suggestions: 4,
-          // Include reverse transliteration flag for Bangla words
-          reverse: /[\u0980-\u09FF]/.test(word)
+          reverse: /[\u0980-\u09FF]/.test(word),
         });
 
-        console.log('✅ Got suggestions:', result.suggestions);
         setSuggestions(result.suggestions);
-      } catch (error) {
-        console.error('❌ Transliteration API failed:', error);
-        // If API fails, don't show suggestions
+      } catch {
         setSuggestions([]);
       } finally {
         setLoading(false);
@@ -73,13 +64,6 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [suggestions, selectedIndex, onSelect, onClose]);
 
-  console.log('🎨 TransliterationDropdown render:', {
-    word,
-    loading,
-    suggestionsCount: suggestions.length,
-    position
-  });
-
   if (loading) {
     return (
       <div
@@ -91,19 +75,14 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
     );
   }
 
-  if (suggestions.length === 0) {
-    console.log('⚠️ No suggestions to show');
-    return null;
-  }
-
-  console.log('✅ Rendering dropdown with', suggestions.length, 'suggestions');
+  if (suggestions.length === 0) return null;
 
   return (
     <div
       className="fixed z-50 bg-white border-2 border-green-500 rounded-lg shadow-2xl min-w-[220px] overflow-hidden"
       style={{
         top: `${position.top}px`,
-        left: `${position.left}px`
+        left: `${position.left}px`,
       }}
     >
       <div className="bg-green-50 px-3 py-1 border-b border-green-200">
@@ -112,10 +91,11 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
       {suggestions.map((suggestion, index) => (
         <div
           key={index}
-          className={`px-4 py-3 cursor-pointer transition-colors bengali-text text-lg border-b border-gray-100 last:border-b-0 ${index === selectedIndex
+          className={`px-4 py-3 cursor-pointer transition-colors bengali-text text-lg border-b border-gray-100 last:border-b-0 ${
+            index === selectedIndex
               ? 'bg-green-100 text-green-900 font-semibold'
               : 'hover:bg-gray-50 text-gray-900'
-            }`}
+          }`}
           onClick={() => onSelect(suggestion.text)}
         >
           <span className="text-gray-400 text-sm mr-3 font-mono">{index + 1}.</span>
@@ -130,4 +110,3 @@ export function TransliterationDropdown({ position, word, onSelect, onClose }: P
     </div>
   );
 }
-

@@ -28,5 +28,5 @@ Write-Host "API Docs: http://localhost:8000/docs" -ForegroundColor Cyan
 Write-Host "`nPress Ctrl+C to stop`n" -ForegroundColor Yellow
 
 # Start the server
-python main_modular.py
+python main.py
 

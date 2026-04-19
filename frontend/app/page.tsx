@@ -9,6 +9,7 @@ import { UsageLimitBanner } from "@/components/UsageLimitBanner";
 import { useEditorStore } from "@/store/editorStore";
 
 import { LANDING_CONTENT } from "@/constants/content";
+import { Toast } from "@/components/Toast";
 
 // Dynamic import to avoid SSR issues with TipTap
 const Editor = dynamic(() => import("@/components/Editor").catch((error) => {
@@ -41,6 +42,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Toast />
       <Header />
 
       {/* Hero Section */}
@@ -590,7 +592,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-200 pt-8 text-center text-gray-600">
-            <p className="mb-2">© 2025 GoBengali. All rights reserved.</p>
+            <p className="mb-2">&copy; {new Date().getFullYear()} GoBengali. All rights reserved.</p>
             <p className="text-sm">Built with ❤️ for the Bengali community</p>
           </div>
         </div>
