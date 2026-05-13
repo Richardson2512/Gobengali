@@ -7,8 +7,21 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // 30 seconds for ML model processing
+  timeout: 60000,
 });
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const status = error.response?.status;
+    if (status === 503 && !error.config._retried) {
+      error.config._retried = true;
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return apiClient(error.config);
+    }
+    return Promise.reject(error);
+  }
+);
 
 export interface AnalyzeRequest {
   text: string;

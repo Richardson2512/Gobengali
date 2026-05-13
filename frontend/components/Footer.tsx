@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { Github, Twitter } from "lucide-react";
 
 export function Footer() {
   return (
@@ -11,14 +12,34 @@ export function Footer() {
               <img src="/logo.png" alt="GoBengali Logo" className="h-8 w-auto" />
               <span className="text-xl font-bold text-gray-900">GoBengali</span>
             </Link>
-            <p className="text-gray-600 text-sm">Empowering Bangla Writers with AI-powered tools</p>
+            <p className="text-gray-600 text-sm mb-4">Empowering Bangla Writers with AI-powered tools</p>
+            <div className="flex items-center gap-3">
+              <a
+                href="https://github.com/gobengali"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-gray-900 transition-colors"
+                aria-label="GitHub"
+              >
+                <Github size={20} />
+              </a>
+              <a
+                href="https://twitter.com/gobengali"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-blue-500 transition-colors"
+                aria-label="Twitter"
+              >
+                <Twitter size={20} />
+              </a>
+            </div>
           </div>
           <div>
             <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
             <ul className="space-y-2 text-sm text-gray-600">
               <li><Link href="/features" className="hover:text-green-600">Features</Link></li>
-              <li><a href="#" className="hover:text-green-600">Pricing</a></li>
-              <li><a href="#" className="hover:text-green-600">API</a></li>
+              <li><Link href="/pricing" className="hover:text-green-600">Pricing</Link></li>
+              <li><Link href="/documentation#api" className="hover:text-green-600">API</Link></li>
             </ul>
           </div>
           <div>
@@ -46,4 +67,3 @@ export function Footer() {
     </footer>
   );
 }
-
