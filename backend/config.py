@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+    # Gemini
+    GEMINI_API_KEY: str = ""
+
     # ML Models
     MODEL_CACHE_DIR: str = "./models"
     TRANSLATION_MODEL: str = ""  # Disabled for stability testing

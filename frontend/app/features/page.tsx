@@ -194,34 +194,44 @@ export default function FeaturesPage() {
       <section className="py-16 bg-gradient-to-r from-green-600 to-emerald-600">
         <div className="container mx-auto px-4 max-w-4xl text-center">
           <Zap size={48} className="text-white mx-auto mb-6" />
-          <h2 className="text-4xl font-bold text-white mb-4">Unlock Pro Features</h2>
+          <h2 className="text-4xl font-bold text-white mb-4">Ready to Write Better Bengali?</h2>
           <p className="text-xl text-green-100 mb-8">
-            Get unlimited access to all features with GoBengali Pro
+            Start free — no account needed. Upgrade to Pro for unlimited access.
           </p>
-          <div className="grid md:grid-cols-2 gap-6 text-left mb-8">
+          <div className="grid md:grid-cols-2 gap-6 text-left mb-10">
             <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg">
-              <h3 className="text-xl font-bold text-white mb-3">Free Tier</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Free</h3>
               <ul className="space-y-2 text-green-100">
                 <li>✓ 500 words per day</li>
-                <li>✓ 15 AI suggestion accepts/day</li>
-                <li>✓ Basic features</li>
+                <li>✓ Basic grammar &amp; spelling</li>
+                <li>✓ Live transliteration</li>
+                <li>✓ Translation</li>
               </ul>
             </div>
             <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg">
-              <h3 className="text-xl font-bold text-white mb-3">Pro Tier</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Pro</h3>
               <ul className="space-y-2 text-green-100">
                 <li>✓ Unlimited words</li>
-                <li>✓ Unlimited AI suggestions</li>
+                <li>✓ Advanced AI grammar</li>
+                <li>✓ API access</li>
                 <li>✓ Priority support</li>
               </ul>
             </div>
           </div>
-          <Link
-            href="/"
-            className="inline-block bg-white text-green-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-50 transition-colors shadow-lg"
-          >
-            Try GoBengali Free
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/"
+              className="inline-block bg-white text-green-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-50 transition-colors shadow-lg"
+            >
+              Try Free Now
+            </Link>
+            <Link
+              href="/pricing"
+              className="inline-block bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white/10 transition-colors"
+            >
+              View Pricing
+            </Link>
+          </div>
         </div>
       </section>
 
