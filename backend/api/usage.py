@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import date
 
 from database import get_db
-from models import UsageLog, User as UserModel
+from db_models import UsageLog, User as UserModel
 from config import settings
 from api.endpoints.auth import get_current_active_user
 

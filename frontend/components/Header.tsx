@@ -107,7 +107,7 @@ export function Header() {
                     <Button variant="outline" size="sm">Sign In</Button>
                   </Link>
                   <Link href="/signup">
-                    <Button variant="primary" size="sm">Sign Up</Button>
+                    <Button variant="default" size="sm">Sign Up</Button>
                   </Link>
                 </>
               )}
