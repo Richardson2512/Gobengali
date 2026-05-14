@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from config import settings
 from database import get_db
-from models import User as UserModel
+from db_models import User as UserModel
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

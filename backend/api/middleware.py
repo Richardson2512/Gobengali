@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 
 from config import settings
 from database import SessionLocal
-from models import User
+from db_models import User
 
 
 class OptionalAuthMiddleware(BaseHTTPMiddleware):

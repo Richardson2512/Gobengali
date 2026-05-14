@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 from config import settings
 from database import get_db
-from models import User as UserModel
+from db_models import User as UserModel
 from .auth import get_current_active_user
 from sqlalchemy.orm import Session
 

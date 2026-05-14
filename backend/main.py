@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
     logger.info("Starting GoBengali API server...")
 
     # Create database tables
-    from models import User, UsageLog  # noqa: F401
+    from db_models import User, UsageLog  # noqa: F401
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created/verified.")
 
