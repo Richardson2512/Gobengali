@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001"
 
+    # Database
+    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/gobengali"
+
     # JWT — no default; must be set via environment variable
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
@@ -24,9 +27,14 @@ class Settings(BaseSettings):
 
     # ML Models
     MODEL_CACHE_DIR: str = "./models"
-    TRANSLATION_MODEL: str = ""  # Disabled for stability testing
+    TRANSLATION_MODEL: str = "ai4bharat/indictrans2-en-indic-dist-200M"
+    TRANSLATION_ENABLED: bool = True
     GRAMMAR_MODEL: str = "ai4bharat/IndicBERTv2-MLM-only"
     SPELLING_MODEL: str = "custom-bspell"
+
+    # Razorpay
+    RAZORPAY_KEY_ID: str = ""
+    RAZORPAY_KEY_SECRET: str = ""
 
     # Rate Limits
     FREE_TIER_DAILY_WORDS: int = 1000

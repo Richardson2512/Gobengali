@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CheckCircle, Zap, Shield, Headphones, Code } from "lucide-react";
 import { Footer } from "@/components/Footer";
 
@@ -25,12 +26,154 @@ const PRO_FEATURES = [
   "Priority support",
 ];
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  order_id: string;
+  name: string;
+  description: string;
+  prefill?: { email?: string; name?: string };
+  theme?: { color?: string };
+  handler: (response: RazorpayPaymentResponse) => void;
+  modal?: { ondismiss?: () => void };
+}
+
+interface RazorpayInstance {
+  open(): void;
+}
+
+interface RazorpayPaymentResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (document.getElementById("razorpay-script")) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "razorpay-script";
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
+function getAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("access_token");
+}
+
+function getUserEmail(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem("user_email") || "";
+}
+
 export default function PricingPage() {
   const [annual, setAnnual] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const monthlyPrice = 9;
   const annualPrice = Math.round(monthlyPrice * 12 * 0.8);
   const displayMonthly = annual ? Math.round((annualPrice / 12) * 10) / 10 : monthlyPrice;
+
+  const handleGetPro = useCallback(async () => {
+    setError(null);
+
+    const token = getAuthToken();
+    if (!token) {
+      router.push("/?login=1");
+      return;
+    }
+
+    setPaying(true);
+
+    try {
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        setError("Failed to load payment gateway. Please try again.");
+        return;
+      }
+
+      const orderRes = await fetch(`${API_URL}/payments/create-order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ plan: annual ? "annual" : "monthly" }),
+      });
+
+      if (!orderRes.ok) {
+        const data = await orderRes.json().catch(() => ({}));
+        setError(data.detail || "Failed to create order. Please try again.");
+        return;
+      }
+
+      const order = await orderRes.json();
+
+      const rzp = new window.Razorpay({
+        key: order.key_id || RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.order_id,
+        name: "GoBengali",
+        description: annual ? "Pro Annual Plan" : "Pro Monthly Plan",
+        prefill: { email: getUserEmail() },
+        theme: { color: "#16a34a" },
+        handler: async (response: RazorpayPaymentResponse) => {
+          try {
+            const verifyRes = await fetch(`${API_URL}/payments/verify`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+
+            if (verifyRes.ok) {
+              router.push("/?upgraded=1");
+            } else {
+              setError("Payment received but verification failed. Contact support.");
+            }
+          } catch {
+            setError("Verification error. Contact support with your payment ID.");
+          } finally {
+            setPaying(false);
+          }
+        },
+        modal: {
+          ondismiss: () => setPaying(false),
+        },
+      });
+
+      rzp.open();
+    } catch {
+      setError("Something went wrong. Please try again.");
+      setPaying(false);
+    }
+  }, [annual, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
@@ -76,6 +219,12 @@ export default function PricingPage() {
               </span>
             </button>
           </div>
+
+          {error && (
+            <div className="mb-6 max-w-md mx-auto bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+              {error}
+            </div>
+          )}
 
           <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
             {/* Free */}
@@ -126,12 +275,13 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link
-                href="/contact"
-                className="block w-full text-center bg-white text-green-600 px-6 py-3 rounded-lg font-bold hover:bg-green-50 transition-colors shadow-lg"
+              <button
+                onClick={handleGetPro}
+                disabled={paying}
+                className="block w-full text-center bg-white text-green-600 px-6 py-3 rounded-lg font-bold hover:bg-green-50 transition-colors shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Get Pro
-              </Link>
+                {paying ? "Processing..." : "Get Pro"}
+              </button>
             </div>
           </div>
         </div>

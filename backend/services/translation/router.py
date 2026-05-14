@@ -1,6 +1,6 @@
 """
 Translation API Router
-Dedicated endpoint for NLLB-200 translation service
+Dedicated endpoint for IndicTrans2 translation service
 """
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -38,17 +38,11 @@ class DetectLanguageResponse(BaseModel):
 @router.post("/translate", response_model=TranslateResponse)
 async def translate_text(request: TranslateRequest):
     """
-    Translate text using NLLB-200 AI model.
-    Primary model: facebook/nllb-200-distilled-1.3B
+    Translate text using IndicTrans2 AI model.
+    Primary model: ai4bharat/indictrans2-en-indic-dist-200M
     """
     try:
         service = get_translation_service()
-
-        if not service.ready:
-            raise HTTPException(
-                status_code=503,
-                detail="Translation service not ready. Models still loading.",
-            )
 
         translated = await service.translate(
             request.text, request.source_lang, request.target_lang

@@ -7,6 +7,8 @@ import logging
 from config import settings
 from api import router as api_router
 from models.model_manager import ModelManager
+from database import engine, Base
+from api.middleware import OptionalAuthMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -25,6 +27,12 @@ async def lifespan(app: FastAPI):
     global model_manager
 
     logger.info("Starting GoBengali API server...")
+
+    # Create database tables
+    from models import User, UsageLog  # noqa: F401
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables created/verified.")
+
     logger.info("Loading ML models...")
 
     try:
@@ -68,6 +76,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Auth middleware
+app.add_middleware(OptionalAuthMiddleware)
 
 # Include API router
 app.include_router(api_router, prefix="/api")
