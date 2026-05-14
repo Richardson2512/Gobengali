@@ -9,9 +9,10 @@ email-validator>=2.0.0
 google-generativeai>=0.7.0
 transformers==4.37.0
 torch>=2.6.0
-sentencepiece==0.1.99
 protobuf==4.25.2
 accelerate==0.26.0
+IndicTransToolkit>=0.1.0
+nltk>=3.8.0
 
 # Language Processing
 langdetect==1.0.9
@@ -22,6 +23,13 @@ language-tool-python>=2.7.0
 # Auth
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
+
+# Database
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.9
+
+# Payments
+razorpay>=1.4.0
 
 # Utilities
 python-dotenv==1.0.0

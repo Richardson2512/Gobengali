@@ -1,15 +1,32 @@
 "use client";
 
 import { useEditorStore } from "@/store/editorStore";
-import { PanelRightOpen, PanelRightClose, Download, Settings } from "lucide-react";
+import { PanelRightOpen, PanelRightClose, Download, Settings, LogOut } from "lucide-react";
 import { Button } from "./ui/Button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ExportModal } from "./ExportModal";
+import { isAuthenticated, getMe, signout, AuthUser } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 export function Header() {
   const { isPanelOpen, togglePanel, wordCount, characterCount, userTier } = useEditorStore();
   const [showExportModal, setShowExportModal] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated()) {
+      getMe().then(setUser);
+    }
+  }, []);
+
+  function handleLogout() {
+    signout();
+    setUser(null);
+    router.push("/login");
+  }
 
   return (
     <>
@@ -56,31 +73,44 @@ export function Header() {
 
             {/* Actions */}
             <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowExportModal(true)}
-                icon={<Download size={16} />}
-              >
-                Export
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                icon={<Settings size={16} />}
-              >
-                Settings
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={togglePanel}
-                icon={isPanelOpen ? <PanelRightClose size={16} /> : <PanelRightOpen size={16} />}
-              >
-                {isPanelOpen ? 'Hide' : 'Show'} Assistant
-              </Button>
+              {user ? (
+                <>
+                  <span className="text-sm text-gray-600 mr-2">{user.name}</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowExportModal(true)}
+                    icon={<Download size={16} />}
+                  >
+                    Export
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={togglePanel}
+                    icon={isPanelOpen ? <PanelRightClose size={16} /> : <PanelRightOpen size={16} />}
+                  >
+                    {isPanelOpen ? 'Hide' : 'Show'} Assistant
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleLogout}
+                    icon={<LogOut size={16} />}
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="outline" size="sm">Sign In</Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button variant="primary" size="sm">Sign Up</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
