@@ -16,6 +16,8 @@ class GrammarService:
     def __init__(self):
         self.gemini_client = None
         self.ready = False
+        self.primary_ready = False
+        self.fallback_ready = False
         logger.info("Grammar Service initialized (Gemini Flash)")
 
     async def load(self):
@@ -28,6 +30,7 @@ class GrammarService:
             genai.configure(api_key=api_key)
             self.gemini_client = genai.GenerativeModel("gemini-1.5-flash")
             self.ready = True
+            self.primary_ready = True
             logger.info("Gemini Flash grammar model ready")
         except Exception as e:
             logger.error(f"Failed to initialise Gemini client: {e}")
