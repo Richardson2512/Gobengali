@@ -7,8 +7,8 @@ from collections import defaultdict
 import logging
 import time
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from config import settings
@@ -18,7 +18,13 @@ from db_models import User as UserModel
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def _hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def _verify_password(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/signin", auto_error=False)
 
 _rate_limit_store: dict[str, list[float]] = defaultdict(list)
@@ -110,7 +116,7 @@ async def signup(data: SignupRequest, request: Request, db: Session = Depends(ge
 
     user = UserModel(
         email=data.email,
-        password_hash=pwd_context.hash(data.password),
+        password_hash=_hash_password(data.password),
         name=data.name,
     )
     db.add(user)
@@ -130,7 +136,7 @@ async def signin(data: SigninRequest, request: Request, db: Session = Depends(ge
     _check_rate_limit(request.client.host)
 
     user = db.query(UserModel).filter(UserModel.email == data.email).first()
-    if not user or not pwd_context.verify(data.password, user.password_hash):
+    if not user or not _verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Incorrect email or password")
 
     token = create_access_token({"sub": user.email})

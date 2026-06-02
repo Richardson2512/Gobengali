@@ -32,8 +32,7 @@ build/
 htmlcov/
 *.so
 
-# ML Models (large files)
-backend/models/
+# ML Models (large files) - exclude weights but NOT the models/ Python package
 *.bin
 *.pt
 *.pth

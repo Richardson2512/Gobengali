@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-c7a07.up.railway.app/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.gobengali.com/api';
 
 const apiClient = axios.create({
   baseURL: API_URL,
