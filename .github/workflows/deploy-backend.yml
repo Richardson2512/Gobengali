@@ -14,10 +14,33 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Railway CLI
-        run: npm install -g @railway/cli
+        run: npm install -g @railway/cli@latest
+
+      - name: Write Railway config
+        run: |
+          mkdir -p ~/.railway
+          cat > ~/.railway/config.json << EOF
+          {
+            "projects": {
+              "$GITHUB_WORKSPACE/backend": {
+                "projectPath": "$GITHUB_WORKSPACE/backend",
+                "name": "gobengali",
+                "project": "07f3caf2-c6ee-4606-9888-73e406ab609f",
+                "environment": "2deb1de1-8c06-4db6-ae0b-8efb703b1f01",
+                "environmentName": "production",
+                "service": "7ece0b5d-8d4b-4b65-80ce-4447f6392837"
+              }
+            },
+            "user": {
+              "id": null,
+              "token": null,
+              "accessToken": "${{ secrets.RAILWAY_TOKEN }}",
+              "refreshToken": null,
+              "tokenExpiresAt": null
+            }
+          }
+          EOF
 
       - name: Deploy Backend to Railway
         working-directory: backend
         run: railway up --service backend --detach
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
