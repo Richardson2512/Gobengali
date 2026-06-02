@@ -76,6 +76,7 @@ interface EditorState {
   resetDailyLimits: () => void;
   notify: (notification: Notification) => void;
   clearNotification: () => void;
+  setUserTier: (tier: 'free' | 'pro') => void;
 }
 
 // Helper to get today's date as string
@@ -134,7 +135,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   dailyWordUsage: loadInitialState().dailyWordUsage || 0,
   dailyAcceptsUsage: loadInitialState().dailyAcceptsUsage || 0,
   lastResetDate: loadInitialState().lastResetDate || getTodayDate(),
-  userTier: 'free',
+  userTier: 'free' as 'free' | 'pro',
   dailyWordLimit: 500,
   dailyAcceptsLimit: 15,
   shouldSyncToEditor: false,
@@ -145,6 +146,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setTranslatedContent: (content) => set({ translatedContent: content }),
 
   setSourceLanguage: (lang) => set({ sourceLanguage: lang }),
+
+  setUserTier: (tier: 'free' | 'pro') => set({ userTier: tier }),
 
   setErrors: (errors) => set({ errors }),
 

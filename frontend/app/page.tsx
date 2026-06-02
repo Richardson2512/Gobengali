@@ -545,12 +545,16 @@ export default function Home() {
           <h2 className="text-4xl font-bold text-white mb-4">Improve Your Bangla Writing Today</h2>
           <p className="text-xl text-green-100 mb-8">Join thousands of Bangla writers who trust GoBengali</p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <button className="bg-white text-green-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-50 transition-colors shadow-lg">
-              Start Free
-            </button>
-            <button className="bg-green-700 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-800 transition-colors border-2 border-white">
-              View Pro
-            </button>
+            <Link href="/signup">
+              <button className="bg-white text-green-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-50 transition-colors shadow-lg">
+                Start Free
+              </button>
+            </Link>
+            <Link href="/pricing">
+              <button className="bg-green-700 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-800 transition-colors border-2 border-white">
+                View Pro
+              </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -570,8 +574,8 @@ export default function Home() {
               <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li><Link href="/features" className="hover:text-green-600">Features</Link></li>
-                <li><a href="#" className="hover:text-green-600">Pricing</a></li>
-                <li><a href="#" className="hover:text-green-600">API</a></li>
+                <li><Link href="/pricing" className="hover:text-green-600">Pricing</Link></li>
+                <li><Link href="/documentation#api" className="hover:text-green-600">API</Link></li>
               </ul>
             </div>
             <div>

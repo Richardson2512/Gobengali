@@ -2,14 +2,15 @@
 
 import { useEditorStore } from "@/store/editorStore";
 import { AlertCircle, Zap } from "lucide-react";
+import Link from "next/link";
 
 export function UsageLimitBanner() {
-  const { 
-    dailyWordUsage, 
-    dailyWordLimit, 
-    dailyAcceptsUsage, 
+  const {
+    dailyWordUsage,
+    dailyWordLimit,
+    dailyAcceptsUsage,
     dailyAcceptsLimit,
-    userTier 
+    userTier
   } = useEditorStore();
 
   // Don't show for pro users
@@ -86,10 +87,12 @@ export function UsageLimitBanner() {
               <p className="text-sm text-gray-700 mb-2">
                 ⏰ Limits reset at midnight. Come back tomorrow, or upgrade now!
               </p>
-              <button className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-sm">
-                <Zap size={16} />
-                Upgrade to Pro - Unlimited Access
-              </button>
+              <Link href="/pricing">
+                <button className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-sm">
+                  <Zap size={16} />
+                  Upgrade to Pro - Unlimited Access
+                </button>
+              </Link>
             </div>
           )}
         </div>

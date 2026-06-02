@@ -75,12 +75,12 @@ function loadRazorpayScript(): Promise<boolean> {
 
 function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("access_token");
+  return localStorage.getItem("gobengali_token");
 }
 
 function getUserEmail(): string {
   if (typeof window === "undefined") return "";
-  return localStorage.getItem("user_email") || "";
+  return localStorage.getItem("gobengali_email") || "";
 }
 
 export default function PricingPage() {
@@ -89,9 +89,9 @@ export default function PricingPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const monthlyPrice = 9;
+  const monthlyPrice = 299;
   const annualPrice = Math.round(monthlyPrice * 12 * 0.8);
-  const displayMonthly = annual ? Math.round((annualPrice / 12) * 10) / 10 : monthlyPrice;
+  const displayMonthly = annual ? Math.round(annualPrice / 12) : monthlyPrice;
 
   const handleGetPro = useCallback(async () => {
     setError(null);
@@ -232,7 +232,7 @@ export default function PricingPage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Free</h2>
               <p className="text-gray-500 mb-6">Perfect for casual writers</p>
               <div className="mb-8">
-                <span className="text-5xl font-bold text-gray-900">$0</span>
+                <span className="text-5xl font-bold text-gray-900">₹0</span>
                 <span className="text-gray-500 ml-2">/ month</span>
               </div>
               <ul className="space-y-3 mb-8">
@@ -259,11 +259,11 @@ export default function PricingPage() {
               <h2 className="text-2xl font-bold text-white mb-2">Pro</h2>
               <p className="text-green-100 mb-6">For serious Bengali writers</p>
               <div className="mb-8">
-                <span className="text-5xl font-bold text-white">${displayMonthly}</span>
+                <span className="text-5xl font-bold text-white">₹{displayMonthly}</span>
                 <span className="text-green-100 ml-2">/ month</span>
                 {annual && (
                   <p className="text-green-200 text-sm mt-1">
-                    Billed ${annualPrice}/year
+                    Billed ₹{annualPrice}/year
                   </p>
                 )}
               </div>

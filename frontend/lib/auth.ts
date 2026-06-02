@@ -1,6 +1,7 @@
 import api from "./api";
 
 const TOKEN_KEY = "gobengali_token";
+const EMAIL_KEY = "gobengali_email";
 
 export interface AuthUser {
   email: string;
@@ -34,12 +35,14 @@ export function isAuthenticated(): boolean {
 export async function signup(email: string, password: string, name: string): Promise<AuthResponse> {
   const res = await api.post("/auth/signup", { email, password, name });
   setToken(res.data.access_token);
+  localStorage.setItem(EMAIL_KEY, email);
   return res.data;
 }
 
 export async function signin(email: string, password: string): Promise<AuthResponse> {
   const res = await api.post("/auth/signin", { email, password });
   setToken(res.data.access_token);
+  localStorage.setItem(EMAIL_KEY, email);
   return res.data;
 }
 

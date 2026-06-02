@@ -1,7 +1,7 @@
 "use client";
 
 import { useEditorStore } from "@/store/editorStore";
-import { PanelRightOpen, PanelRightClose, Download, Settings, LogOut } from "lucide-react";
+import { PanelRightOpen, PanelRightClose, Download, LogOut } from "lucide-react";
 import { Button } from "./ui/Button";
 import { useState, useEffect } from "react";
 import { ExportModal } from "./ExportModal";
@@ -11,16 +11,21 @@ import Image from "next/image";
 import Link from "next/link";
 
 export function Header() {
-  const { isPanelOpen, togglePanel, wordCount, characterCount, userTier } = useEditorStore();
+  const { isPanelOpen, togglePanel, wordCount, characterCount, userTier, setUserTier } = useEditorStore();
   const [showExportModal, setShowExportModal] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     if (isAuthenticated()) {
-      getMe().then(setUser);
+      getMe().then((u) => {
+        if (u) {
+          setUser(u);
+          setUserTier(u.plan === "pro" ? "pro" : "free");
+        }
+      });
     }
-  }, []);
+  }, [setUserTier]);
 
   function handleLogout() {
     signout();
