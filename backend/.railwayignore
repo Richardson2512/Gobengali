@@ -1,0 +1,16 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+# Exclude large ML model weight files but NOT the models/ Python package
+*.bin
+*.pt
+*.pth
+*.onnx
+*.safetensors
